@@ -79,12 +79,13 @@ listintoolbar= always | never | iffirstuse
 
 showingui
 radiobtngrp = <group name>
+tikz
+ocgcolorlinks
 ````
 not in `ocgx`, `ocg-p`:
 
 * `showingui` (same as `listintoolbar`)
 * `radiobtngrp = <group name>` (string; environment-only option)
-
 * `tikz`  (package-only option, see above)
 * `ocgcolorlinks`  (package-only option, see above)
 
