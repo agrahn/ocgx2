@@ -47,7 +47,7 @@ texdoc ocgx
 The /tikz/ocg/opts=<ocg options> parameter adds to the list in section "How to add TikZ scopes into OCGs" in the `ocgx` manual. It allows passing ocg environment options (see below) to the TikZ scope.
 
 
-#Usage
+##Usage
 ````latex
 \usepackage[<options>]{ocgx2}
 
