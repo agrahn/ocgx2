@@ -2,7 +2,7 @@
 
 © 2016 Alexander Grahn
 
-#Introduction
+**Introduction**
 
 This package serves as a drop-in replacement for the already existing
 packages `ocgx` by Paul Gaborit and `ocg-p` by Werner Moshammer for the
@@ -17,7 +17,7 @@ packages and adds support for all known engines and back-ends including:
 
 To enable dvipdfmx support, pass `dvipdfmx` globally as a class option.
 
-- New features:
+*New features:*
 
 + layers extending across page breaks
 + grouping layers into Radio Button Groups
@@ -47,20 +47,20 @@ Just say:
 ````
 instead of
 ````latex
-  \usepackage{tikz}
-  \usetikzlibrary{ocgx}
+\usepackage{tikz}
+\usetikzlibrary{ocgx}
 ````
 to enable these TikZ styles and read the `ocgx` documentation about
 their usage:
 ````
-  texdoc ocgx
+texdoc ocgx
 ````
 The /tikz/ocg/opts=<ocg options> parameter adds to the list in section
 "How to add TikZ scopes into OCGs" in the `ocgx` manual. It allows
 passing ocg environment options (see below) to the TikZ scope.
 
 
-#Usage
+**Usage**
 ````latex
 \usepackage[<options>]{ocgx2}
 
@@ -79,11 +79,11 @@ listintoolbar= always | never | iffirstuse
 ````
 not in `ocgx`, `ocg-p`:
 
-`showingui` (same as `listintoolbar`)
-`radiobtngrp = <group name>` (string; environment-only option)
+`  showingui` (same as `listintoolbar`)
+`  radiobtngrp = <group name>` (string; environment-only option)
 
-`tikz`  (package-only option, see above)
-`ocgcolorlinks`  (package-only option, see above)
+`  tikz`  (package-only option, see above)
+`  ocgcolorlinks`  (package-only option, see above)
 
 Package options have global scope. Environment options override package
 options locally.
@@ -100,7 +100,7 @@ to add the layer to more than one Radio Button Group.
 See the `ocg-p` manual about the environment usage and the meaning of
 the remaining options:
 ````
-  texdoc ocg-p
+texdoc ocg-p
 ````
 
 Clickable links for switching PDF layer visibility are created with:
@@ -112,15 +112,15 @@ Clickable links for switching PDF layer visibility are created with:
 ````
 For details about their usage, read the `ocgx` package manual:
 ````
-  texdoc ocgx
+texdoc ocgx
 ````
 For compatibility with the `ocg-p` package, the following commands have
 been provided:
 ````latex
-  \toggleocgs[triggerocg=...]{<layer IDs to toggle, space separated>}{<link text>}
-  \showocgs[triggerocg=...]{<layer IDs to switch ON, space separated>}{<link text>}
-  \hideocgs[triggerocg=...]{<layer IDs to switch OFF, space separated>}{<link text>}
-  \setocgs[triggerocg=...]{<IDs to toggle>}{<IDs to switch ON>}{<IDs to switch OFF>}{<link text>}
+\toggleocgs[triggerocg=...]{<layer IDs to toggle, space separated>}{<link text>}
+\showocgs[triggerocg=...]{<layer IDs to switch ON, space separated>}{<link text>}
+\hideocgs[triggerocg=...]{<layer IDs to switch OFF, space separated>}{<link text>}
+\setocgs[triggerocg=...]{<IDs to toggle>}{<IDs to switch ON>}{<IDs to switch OFF>}{<link text>}
 ````
 See the `ocg-p` package manual for the meaning of `triggerocg=...`.
 
@@ -128,6 +128,6 @@ See the `ocg-p` package manual for the meaning of `triggerocg=...`.
                      * * *
 
 
-#License:
+**License**
 
 This material is subject to the [LaTeX Project Public License](LICENSE).
