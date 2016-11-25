@@ -2,7 +2,7 @@
 
 © 2016 Alexander Grahn
 
-**Introduction**
+##Introduction
 
 This package serves as a drop-in replacement for the already existing packages `ocgx` by Paul Gaborit and `ocg-p` by Werner Moshammer for the creation of PDF Layers.
 
@@ -47,7 +47,7 @@ texdoc ocgx
 The /tikz/ocg/opts=<ocg options> parameter adds to the list in section "How to add TikZ scopes into OCGs" in the `ocgx` manual. It allows passing ocg environment options (see below) to the TikZ scope.
 
 
-**Usage**
+#Usage
 ````latex
 \usepackage[<options>]{ocgx2}
 
@@ -112,6 +112,6 @@ See the `ocg-p` package manual for the meaning of `triggerocg=...`.
                      * * *
 
 
-**License**
+##License
 
 This material is subject to the [LaTeX Project Public License](LICENSE).
