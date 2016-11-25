@@ -76,14 +76,17 @@ viewocg = always | never | ifvisible
 printocg =  always | never | ifvisible
 exportocg =  always | never | ifvisible
 listintoolbar= always | never | iffirstuse
+
+showingui
+radiobtngrp = <group name>
 ````
 not in `ocgx`, `ocg-p`:
 
-`  showingui` (same as `listintoolbar`)
-`  radiobtngrp = <group name>` (string; environment-only option)
+* `showingui` (same as `listintoolbar`)
+* `radiobtngrp = <group name>` (string; environment-only option)
 
-`  tikz`  (package-only option, see above)
-`  ocgcolorlinks`  (package-only option, see above)
+* `tikz`  (package-only option, see above)
+* `ocgcolorlinks`  (package-only option, see above)
 
 Package options have global scope. Environment options override package
 options locally.
