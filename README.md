@@ -8,8 +8,8 @@ This package serves as a drop-in replacement for the already existing packages `
 
 It re-implements the functionality of the `ocg`, `ocgx` and `ocg-p` packages and adds support for all known engines and back-ends including:
 
-- LaTeX --> dvips --> ps2pdf/Distiller
-- (Xe)LaTeX --> (x)dvipdfmx
+- LaTeX &rArr; dvips &rArr; ps2pdf/Distiller
+- (Xe)LaTeX &rArr; (x)dvipdfmx
 - pdfLaTeX, luaLaTeX
 
 To enable dvipdfmx support, pass `dvipdfmx` globally as a class option.
