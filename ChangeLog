@@ -1,3 +1,12 @@
+2017-03-09
+	* v0.19 : ocgx2.sty
+	* v0.7  : ocgbase.sty
+	* fix: minor code fixes
+
+2017-03-07
+	* v0.18 : ocgx2.sty
+	* fix: workaround for A-Reader bug when placing OCG switches on OCGs
+
 2016-03-22
 	* v0.17 : ocgx2.sty
 	* new: option `ocgcolorlinks', enables OCG colour links for hyperref package

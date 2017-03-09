@@ -31,7 +31,7 @@
 %     #2: usage dict (may be empty), see PDF reference:
 %         http://wwwimages.adobe.com/content/dam/Adobe/en/devnet/pdf/pdfs/
 %                pdf_reference_1-7.pdf#G9.3858276
-%     #3: initial visibility (1|0|true|false|on|off)
+%     #3: initial visibility (1|0|true|false|on|off|visible|invisible)
 %
 %   \ocgbase_last_ocg:
 %   \ocgbase@last@ocg (LaTeX2e version)
@@ -97,7 +97,7 @@
 \RequirePackage{atenddvi}
 \RequirePackage{pdfbase}
 
-\ProvidesExplPackage{ocgbase}{2016/03/11}{0.6}
+\ProvidesExplPackage{ocgbase}{2017/03/09}{0.7}
 {support package for ocgx2.sty}
 
 \tl_new:N\g_ocgbase_ocgs_tl %takes ocg object refs
@@ -212,13 +212,14 @@
 %macro for inserting new OCG object
 \cs_new_nopar:Nn\ocgbase_new_ocg:nnn{
   \pbs_pdfobj:nnn{}{dict}{
-    /Type/OCG/Name~(#1)~\tl_if_blank:oF{#2}{/Usage<<#2>>}
+    /Type/OCG/Name~(#1)~\str_if_eq_x:nnF{#2}{}{/Usage<<#2>>}
   }
   \tl_gput_right:Nx\g_ocgbase_ocgs_tl{~\pbs_pdflastobj:}
   \bool_if:nT{
     \str_if_eq_x_p:nn{#3}{0} ||
     \str_if_eq_x_p:nn{#3}{off} ||
-    \str_if_eq_x_p:nn{#3}{false}
+    \str_if_eq_x_p:nn{#3}{false} ||
+    \str_if_eq_x_p:nn{#3}{invisible}
   }{
     \ocgbase_add_to_off_list:n{\pbs_pdflastobj:}
   }
