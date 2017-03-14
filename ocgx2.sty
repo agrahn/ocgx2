@@ -37,7 +37,10 @@
 \RequirePackage{xparse}
 \RequirePackage{l3keys2e}
 
-\ProvidesExplPackage{ocgx2}{2017/03/09}{0.19}
+\def\g@ocgxii@date@tl{2017/03/09}
+\def\g@ocgxii@version@tl{0.19}
+
+\ProvidesExplPackage{ocgx2}{\g@ocgxii@date@tl}{\g@ocgxii@version@tl}
 {ports `ocgx' functionality to dvips+ps2pdf, xelatex and dvipdfmx}
 
 %creating global definitions
@@ -373,176 +376,32 @@
 
 \int_new:N\g_ocgxii_widcount_int% widget counter
 
-%re-implement commands from ocg-p.sty / ocgx.sty (all engines including
-%ps2pdf [gs>=9.15])
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% re-implement commands from ocgx.sty (all engines including ps2pdf [gs>=9.15])
+% adding optional `*` (arg 1) -> non-breakable Button Widget & mouse-up trigger
+%   instead of plain (multiline) Link
+% adding optional 2nd argument -> Button Widget with one of various mouse
+% triggers
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \DeclareDocumentCommand\switchocg{s o m +m}{
-  \leavevmode
-  \bool_if:nTF{
-    \IfBooleanTF{#1}{\c_true_bool}{\c_false_bool} ||
-    \IfValueTF{#2}{\c_true_bool}{\c_false_bool}
-  }{
-    % implemented as Widget annot (non-breakable)
-    \ocgxii_ocglist_process_idlist:nn{
-      \IfValueTF{#2}{#2}{triggerocg=onmouseup}
-    }{#3}
-    \hbox_set:Nn\l_tmpa_box{#4}
-    %dummy Widget, workaround for pre AR-DC bug;
-    %see https://forums.adobe.com/message/5787612#5787612
-    \str_if_eq_x:nnF{\ocgxii@insert@OC}{}{\pbs_pdfannot:nnnn{
-      \dim_use:N\box_wd:N\l_tmpa_box}{
-      \dim_use:N\box_ht:N\l_tmpa_box}{
-      \dim_use:N\box_dp:N\l_tmpa_box
-    }{/Subtype/Widget/F~2}}
-    \pbs_pdfannot:nnnn{
-      \dim_use:N\box_wd:N\l_tmpa_box}{
-      \dim_use:N\box_ht:N\l_tmpa_box}{
-      \dim_use:N\box_dp:N\l_tmpa_box
-    }{
-      /Subtype/Widget/Ff~65536/FT/Btn/H/I
-      /T~(ocgx2@\int_use:N\g_ocgxii_widcount_int)
-      \ocgxii@insert@OC
-      /AA <<
-        \str_if_eq:VnF\l_ocgxii_u_list_tl{}{
-          /U <</S/SetOCGState/State [/Toggle~\l_ocgxii_u_list_tl]>>
-        }
-        \str_if_eq:VnF\l_ocgxii_d_list_tl{}{
-          /D <</S/SetOCGState/State [/Toggle~\l_ocgxii_d_list_tl]>>
-        }
-        \str_if_eq:VnF\l_ocgxii_e_list_tl{}{
-          /E <</S/SetOCGState/State [/Toggle~\l_ocgxii_e_list_tl]>>
-        }
-        \str_if_eq:VnF\l_ocgxii_x_list_tl{}{
-          /X <</S/SetOCGState/State [/Toggle~\l_ocgxii_x_list_tl]>>
-        }
-      >>
-    }\box_use_clear:N\l_tmpa_box
-    \pbs_appendtofields:n{\pbs_pdflastann:}
-    \int_gincr:N\g_ocgxii_widcount_int
-  }{
-    \ocgxii_ocglist_process_idlist:nn{triggerocg=onmouseup}{#3}
-    \pbs_pdflink:nn{
-      /Subtype/Link\ocgxii@insert@OC
-      /A <</S/SetOCGState/State [
-        \str_if_eq:VnF\l_ocgxii_u_list_tl{}{/Toggle~\l_ocgxii_u_list_tl}]>>
-      /Border [0~0~0]
-    }{#4}
-  }
+  \ocgxii_actionsocg:nnnnnn{#1}{#2}{#3}{}{}{#4}
 }
 
 \DeclareDocumentCommand\showocg{s o m +m}{
-  \leavevmode
-  \bool_if:nTF{
-    \IfBooleanTF{#1}{\c_true_bool}{\c_false_bool} ||
-    \IfValueTF{#2}{\c_true_bool}{\c_false_bool}
-  }{
-    % implemented as Widget annot (non-breakable)
-    \ocgxii_ocglist_process_idlist:nn{
-      \IfValueTF{#2}{#2}{triggerocg=onmouseup}
-    }{#3}
-    \hbox_set:Nn\l_tmpa_box{#4}
-    %dummy Widget, workaround for pre AR-DC bug;
-    %see https://forums.adobe.com/message/5787612#5787612
-    \str_if_eq_x:nnF{\ocgxii@insert@OC}{}{\pbs_pdfannot:nnnn{
-      \dim_use:N\box_wd:N\l_tmpa_box}{
-      \dim_use:N\box_ht:N\l_tmpa_box}{
-      \dim_use:N\box_dp:N\l_tmpa_box
-    }{/Subtype/Widget/F~2}}
-    \pbs_pdfannot:nnnn{
-      \dim_use:N\box_wd:N\l_tmpa_box}{
-      \dim_use:N\box_ht:N\l_tmpa_box}{
-      \dim_use:N\box_dp:N\l_tmpa_box
-    }{
-      /Subtype/Widget/Ff~65536/FT/Btn/H/I
-      /T~(ocgx2@\int_use:N\g_ocgxii_widcount_int)
-      \ocgxii@insert@OC
-      /AA <<
-        \str_if_eq:VnF\l_ocgxii_u_list_tl{}{
-          /U <</S/SetOCGState/State [/ON~\l_ocgxii_u_list_tl]>>
-        }
-        \str_if_eq:VnF\l_ocgxii_d_list_tl{}{
-          /D <</S/SetOCGState/State [/ON~\l_ocgxii_d_list_tl]>>
-        }
-        \str_if_eq:VnF\l_ocgxii_e_list_tl{}{
-          /E <</S/SetOCGState/State [/ON~\l_ocgxii_e_list_tl]>>
-        }
-        \str_if_eq:VnF\l_ocgxii_x_list_tl{}{
-          /X <</S/SetOCGState/State [/ON~\l_ocgxii_x_list_tl]>>
-        }
-      >>
-    }\box_use_clear:N\l_tmpa_box
-    \pbs_appendtofields:n{\pbs_pdflastann:}
-    \int_gincr:N\g_ocgxii_widcount_int
-  }{
-    \ocgxii_ocglist_process_idlist:nn{triggerocg=onmouseup}{#3}
-    \pbs_pdflink:nn{
-      /Subtype/Link\ocgxii@insert@OC
-      /A <</S/SetOCGState/State [
-        \str_if_eq:VnF\l_ocgxii_u_list_tl{}{/ON~\l_ocgxii_u_list_tl}]>>
-      /Border [0~0~0]
-    }{#4}
-  }
+  \ocgxii_actionsocg:nnnnnn{#1}{#2}{}{#3}{}{#4}
 }
 
 \DeclareDocumentCommand\hideocg{s o m +m}{
-  \leavevmode
-  \bool_if:nTF{
-    \IfBooleanTF{#1}{\c_true_bool}{\c_false_bool} ||
-    \IfValueTF{#2}{\c_true_bool}{\c_false_bool}
-  }{
-    % implemented as Widget annot (non-breakable)
-    \ocgxii_ocglist_process_idlist:nn{
-      \IfValueTF{#2}{#2}{triggerocg=onmouseup}
-    }{#3}
-    \hbox_set:Nn\l_tmpa_box{#4}
-    %dummy Widget, workaround for pre AR-DC bug;
-    %see https://forums.adobe.com/message/5787612#5787612
-    \str_if_eq_x:nnF{\ocgxii@insert@OC}{}{\pbs_pdfannot:nnnn{
-      \dim_use:N\box_wd:N\l_tmpa_box}{
-      \dim_use:N\box_ht:N\l_tmpa_box}{
-      \dim_use:N\box_dp:N\l_tmpa_box
-    }{/Subtype/Widget/F~2}}
-    \pbs_pdfannot:nnnn{
-      \dim_use:N\box_wd:N\l_tmpa_box}{
-      \dim_use:N\box_ht:N\l_tmpa_box}{
-      \dim_use:N\box_dp:N\l_tmpa_box
-    }{
-      /Subtype/Widget/Ff~65536/FT/Btn/H/I
-      /T~(ocgx2@\int_use:N\g_ocgxii_widcount_int)
-      \ocgxii@insert@OC
-      /AA <<
-        \str_if_eq:VnF\l_ocgxii_u_list_tl{}{
-          /U <</S/SetOCGState/State [/OFF~\l_ocgxii_u_list_tl]>>
-        }
-        \str_if_eq:VnF\l_ocgxii_d_list_tl{}{
-          /D <</S/SetOCGState/State [/OFF~\l_ocgxii_d_list_tl]>>
-        }
-        \str_if_eq:VnF\l_ocgxii_e_list_tl{}{
-          /E <</S/SetOCGState/State [/OFF~\l_ocgxii_e_list_tl]>>
-        }
-        \str_if_eq:VnF\l_ocgxii_x_list_tl{}{
-          /X <</S/SetOCGState/State [/OFF~\l_ocgxii_x_list_tl]>>
-        }
-      >>
-    }\box_use_clear:N\l_tmpa_box
-    \pbs_appendtofields:n{\pbs_pdflastann:}
-    \int_gincr:N\g_ocgxii_widcount_int
-  }{
-    \ocgxii_ocglist_process_idlist:nn{triggerocg=onmouseup}{#3}
-    \pbs_pdflink:nn{
-      /Subtype/Link\ocgxii@insert@OC
-      /A <</S/SetOCGState/State [
-        \str_if_eq:VnF\l_ocgxii_u_list_tl{}{/OFF~\l_ocgxii_u_list_tl}]>>
-      /Border [0~0~0]
-    }{#4}
-  }
+  \ocgxii_actionsocg:nnnnnn{#1}{#2}{}{}{#3}{#4}
 }
 
 \DeclareDocumentCommand\actionsocg{s o m m m +m}{
+  \ocgxii_actionsocg:nnnnnn{#1}{#2}{#3}{#4}{#5}{#6}
+}
+
+\cs_new:Nn\ocgxii_actionsocg:nnnnnn{
   \leavevmode
-  \bool_if:nTF{
-    \IfBooleanTF{#1}{\c_true_bool}{\c_false_bool} ||
-    \IfValueTF{#2}{\c_true_bool}{\c_false_bool}
-  }{
+  \bool_if:nTF{#1 || \IfValueTF{#2}{\c_true_bool}{\c_false_bool}}{
     % implemented as Widget annot (non-breakable)
     \ocgxii_ocglist_process_idlist:nn{
       \IfValueTF{#2}{#2}{triggerocg=onmouseup}
@@ -566,7 +425,7 @@
     \tl_set_eq:NN\l_ocgxii_tohide_d_tl\l_ocgxii_d_list_tl
     \tl_set_eq:NN\l_ocgxii_tohide_u_tl\l_ocgxii_u_list_tl
     \hbox_set:Nn\l_tmpa_box{#6}
-    %dummy Widget, workaround for pre AR-DC bug;
+    %(hidden) dummy Widget, workaround for (pre?) AR-DC bug;
     %see https://forums.adobe.com/message/5787612#5787612
     \str_if_eq_x:nnF{\ocgxii@insert@OC}{}{\pbs_pdfannot:nnnn{
       \dim_use:N\box_wd:N\l_tmpa_box}{
@@ -668,11 +527,12 @@
   }
 }
 
-% mimic commands from ocg-p
-\def\toggleocgs{\switchocg*}
-\def\showocgs{\showocg*}
-\def\hideocgs{\hideocg*}
-\def\setocgs{\actionsocg*}
+%mimic commands from ocg-p
+\cs_new:Npn\toggleocgs{\switchocg*}
+\cs_new:Npn\showocgs{\showocg*}
+\cs_new:Npn\hideocgs{\hideocg*}
+\cs_new:Npn\setocgs{\actionsocg*}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \cs_new:Nn\ocgxii_process_ocgref:NN{
   \str_if_eq_x:nnF{#2}{}{
@@ -816,8 +676,10 @@
 \RequirePackage{tikz}
 \usetikzlibrary{calc}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Copyright notice: The code that follows until the end of the file was
 % taken from Paul Gaborit's `tikzlibraryocgx.code.tex' with minor additions.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \tikzset{
   ocg/.style={ocg/.cd,#1,/tikz/.cd},
   ocg={

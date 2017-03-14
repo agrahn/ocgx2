@@ -97,7 +97,10 @@
 \RequirePackage{atenddvi}
 \RequirePackage{pdfbase}
 
-\ProvidesExplPackage{ocgbase}{2017/03/09}{0.7}
+\def\g@ocgbase@date@tl{2017/03/09}
+\def\g@ocgbase@version@tl{0.7}
+
+\ProvidesExplPackage{ocgbase}{\g@ocgbase@date@tl}{\g@ocgbase@version@tl}
 {support package for ocgx2.sty}
 
 \tl_new:N\g_ocgbase_ocgs_tl %takes ocg object refs
