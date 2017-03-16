@@ -1,3 +1,8 @@
+2017-03-16
+	* v0.20 : ocgx2.sty
+	* v0.8  : ocgbase.sty
+	* fix: compatibility with other pkgs (pdfbase, xsavebox, media9, animate)
+
 2017-03-09
 	* v0.19 : ocgx2.sty
 	* v0.7  : ocgbase.sty
