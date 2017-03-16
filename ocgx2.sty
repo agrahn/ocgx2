@@ -425,13 +425,6 @@
     \tl_set_eq:NN\l_ocgxii_tohide_d_tl\l_ocgxii_d_list_tl
     \tl_set_eq:NN\l_ocgxii_tohide_u_tl\l_ocgxii_u_list_tl
     \hbox_set:Nn\l_tmpa_box{#6}
-    %(hidden) dummy Widget, workaround for (pre?) AR-DC bug;
-    %see https://forums.adobe.com/message/5787612#5787612
-    \str_if_eq_x:nnF{\ocgxii@insert@OC}{}{\pbs_pdfannot:nnnn{
-      \dim_use:N\box_wd:N\l_tmpa_box}{
-      \dim_use:N\box_ht:N\l_tmpa_box}{
-      \dim_use:N\box_dp:N\l_tmpa_box
-    }{/Subtype/Widget/F~2}}
     \pbs_pdfannot:nnnn{
       \dim_use:N\box_wd:N\l_tmpa_box}{
       \dim_use:N\box_ht:N\l_tmpa_box}{
@@ -439,7 +432,6 @@
     }{
       /Subtype/Widget/Ff~65536/FT/Btn/H/I
       /T~(ocgx2@\int_use:N\g_ocgxii_widcount_int)
-      \ocgxii@insert@OC
       /AA <<
         \str_if_eq_x:nnF{}{
           \l_ocgxii_toswitch_u_tl\l_ocgxii_toshow_u_tl\l_ocgxii_tohide_u_tl
@@ -513,7 +505,7 @@
     \ocgxii_ocglist_process_idlist:nn{triggerocg=onmouseup}{#5}
     \tl_set_eq:NN\l_ocgxii_tohide_u_tl\l_ocgxii_u_list_tl
     \pbs_pdflink:nn{
-      /Subtype/Link\ocgxii@insert@OC
+      /Subtype/Link
       /A <</S/SetOCGState
         /State [
           \str_if_eq:VnF{\l_ocgxii_toswitch_u_tl}{}{
