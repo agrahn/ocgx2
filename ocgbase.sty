@@ -286,6 +286,25 @@
 \cs_new_nopar:Nn\ocgbase_oc_bdc:n{\pbs_pdfbdc:nn{/OC}{#1}}
 \cs_new_nopar:Nn\ocgbase_oc_emc:{\pbs_pdfemc:}
 
+%stack of PDF obj references of currently open OCGs
+\seq_new:N\g_ocgbase_ocgstack_seq
+%push OCG to stack
+\cs_new_nopar:Nn\ocgbase_ocgstack_push:n{
+  \seq_gpush:Nx\g_ocgbase_ocgstack_seq{#1}}
+%pop OCG from stack into tl
+\cs_new_nopar:Nn\ocgbase_ocgstack_pop:N{\seq_gpop:NN\g_ocgbase_ocgstack_seq#1}
+%get top OCG on stack, without removing it
+\cs_new_nopar:Nn\ocgbase_ocgstack_top:{
+  \seq_item:Nn\g_ocgbase_ocgstack_seq{\c_one}}
+
+%command that inserts /OC <<OCMD with currently open OCGs>> entry;
+%for use within annotation/xobject dicts
+\cs_new_nopar:Nn\ocgbase_insert_oc:{
+  \seq_if_empty:NF\g_ocgbase_ocgstack_seq{
+    /OC~<</Type/OCMD/OCGs~[\seq_use:Nn\g_ocgbase_ocgstack_seq{~}]/P/AllOn>>
+  }
+}
+
 %l2e versions
 \cs_gset_eq:NN\ocgbase@new@ocg\ocgbase_new_ocg:nnn
 \cs_gset_eq:NN\ocgbase@last@ocg\ocgbase_last_ocg:
@@ -295,3 +314,7 @@
 \cs_gset_eq:NN\ocgbase@add@ocg@to@radiobtn@grp\ocgbase_add_ocg_to_radiobtn_grp:nnn
 \cs_gset_eq:NN\ocgbase@oc@bdc\ocgbase_oc_bdc:n
 \cs_gset_eq:NN\ocgbase@oc@emc\ocgbase_oc_emc:
+\cs_gset_eq:NN\ocgbase@insert@oc\ocgbase_insert_oc:
+\cs_gset_eq:NN\ocgbase@ocgstack@top\ocgbase_ocgstack_top:
+\cs_gset_eq:NN\ocgbase@ocgstack@pop\ocgbase_ocgstack_pop:N
+\cs_gset_eq:NN\ocgbase@ocgstack@push\ocgbase_ocgstack_push:n

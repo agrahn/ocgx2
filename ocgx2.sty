@@ -46,6 +46,14 @@
 %creating global definitions
 \cs_new:Npn\ocgxii@newkey#1#2{\tl_gset:cx{#1}{#2}}
 
+\msg_set:nnn{ocgx2}{missing~package}{
+  Package~`#1'~must~be~loaded~before~ocgx2.\\\\
+  Put\\\\
+  \space\space\string\usepackage#2{#1}\\
+  \space\space\string\usepackage[ocgcolorlinks]{ocgx2}\\\\
+  to~the~preamble~of~your~document.
+}
+
 %package opts
 %unknown package option error message
 \msg_set:nnnn{ocgx2}{unknown~package~option}{Unknown~package~option~`#1'.}{
@@ -138,9 +146,7 @@
 
 \cs_new_nopar:Nn\ocgxii_beginocg:nnnn{
   \bool_if:NT\g_ocgxii_nestedB_bool{
-    \seq_gput_left:Nx\g_ocgxii_nested_seq{
-      \seq_item:Nn\g_ocgxii_ocgstack_seq{\c_one}
-    }
+    \seq_gput_left:Nx\g_ocgxii_nested_seq{\ocgbase_ocgstack_top:}
     \ocgbase_add_to_order_list:n{[}
   }
   \bool_gset_true:N\g_ocgxii_nestedB_bool
@@ -200,8 +206,8 @@
       }
     }
     \tl_gset:cx{ocgx2.ocg.#3}{\tl_use:c{ocgxii@#3}}
-    \seq_gput_left:Nx\g_ocgxii_ocgstack_seq{\tl_use:c{ocgxii@#3}}
-    \ocgxii_ocgstack_shipout:N\g_ocgxii_ocgstack_seq
+    \ocgbase_ocgstack_push:n{\tl_use:c{ocgxii@#3}}
+    \ocgxii_ocgstack_shipout:N\g_ocgbase_ocgstack_seq
   \group_end:
   \ocgbase_oc_bdc:n{\tl_use:c{ocgxii@#3}}
   \ignorespaces
@@ -215,14 +221,14 @@
     \str_if_eq_x_p:nn{
       \seq_item:Nn\g_ocgxii_nested_seq{\c_one}
     }{
-      \seq_item:Nn\g_ocgxii_ocgstack_seq{\c_one}
+      \ocgbase_ocgstack_top:
     }
   }{
     \ocgbase_add_to_order_list:n{]}
     \seq_gpop_left:NN\g_ocgxii_nested_seq\l_trash_tl
   }
-  \seq_gpop_left:NN\g_ocgxii_ocgstack_seq\l_trash_tl
-  \ocgxii_ocgstack_shipout:N\g_ocgxii_ocgstack_seq
+  \ocgbase_ocgstack_pop:N\l_trash_tl
+  \ocgxii_ocgstack_shipout:N\g_ocgbase_ocgstack_seq
   \bool_gset_false:N\g_ocgxii_nestedB_bool
   \bool_gset_true:N\g_ocgxii_nestedE_bool
 }
@@ -314,17 +320,6 @@
     \ocgxii_at_end_page:
   }
   \ocgxii_outputpage_orig:
-}
-
-%stack of PDF obj references of currently open OCGs
-\seq_new:N\g_ocgxii_ocgstack_seq
-
-%macro that inserts /OC <<OCMD with currently open OCGs>> entry;
-%for use within annotation dicts
-\cs_new_nopar:Npn\ocgxii@insert@OC{
-  \seq_if_empty:NF\g_ocgxii_ocgstack_seq{
-    /OC~<</Type/OCMD/OCGs~[\seq_use:Nn\g_ocgxii_ocgstack_seq{~}]/P/AllOn>>
-  }
 }
 
 \cs_new_nopar:Nn\ocgxii_ocglist_reset:{
@@ -524,7 +519,7 @@
 \cs_new:Npn\showocgs{\showocg*}
 \cs_new:Npn\hideocgs{\hideocg*}
 \cs_new:Npn\setocgs{\actionsocg*}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \cs_new:Nn\ocgxii_process_ocgref:NN{
   \str_if_eq_x:nnF{#2}{}{
@@ -645,10 +640,8 @@
   }
 }
 
-\RequirePackage{scrlfile}
 \bool_if:NT\l_ocgxii_ocgcolorlinks_bool{
-  \PassOptionsToPackage{colorlinks}{hyperref}
-  \AfterPackage*{hyperref}{
+  \@ifpackageloaded{hyperref}{
     \Hy@colorlinkstrue
     \Hy@AtBeginDocument{
       \ocgbase_new_ocg:nnn{OCView}{/Print<</PrintState/OFF>>}{on}
@@ -657,6 +650,8 @@
       \tl_gset:Nx\OBJ@OCG@print{\ocgbase_last_ocg:}
       \ocgxii_enable_ocglinks:
     }
+  }{
+    \msg_error:nnn{ocgx2}{missing~package}{hyperref}
   }
 }
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
