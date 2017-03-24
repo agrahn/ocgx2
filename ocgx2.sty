@@ -37,14 +37,22 @@
 \RequirePackage{xparse}
 \RequirePackage{l3keys2e}
 
-\def\g@ocgxii@date@tl{2017/03/16}
-\def\g@ocgxii@version@tl{0.20}
+\def\g@ocgxii@date@tl{2017/03/23}
+\def\g@ocgxii@version@tl{0.21}
 
 \ProvidesExplPackage{ocgx2}{\g@ocgxii@date@tl}{\g@ocgxii@version@tl}
 {ports `ocgx' functionality to dvips+ps2pdf, xelatex and dvipdfmx}
 
 %creating global definitions
 \cs_new:Npn\ocgxii@newkey#1#2{\tl_gset:cx{#1}{#2}}
+
+\AtBeginDocument{
+  \iow_now:Nx\@mainaux{
+    \token_to_str:N\providecommand\token_to_str:N\ocgxii@newkey[2]{}
+    \token_to_str:N\providecommand
+      \token_to_str:N\ocgxii@stack@on@page[2]{}
+  }
+}
 
 \msg_set:nnn{ocgx2}{missing~package}{
   Package~`#1'~must~be~loaded~before~ocgx2.\\\\
@@ -132,7 +140,7 @@
   Get~an~up~to~date~version~of~`#1'.\\
   Aborting.
 }
-\@ifpackagelater{pdfbase}{2016/03/11}{}{
+\@ifpackagelater{pdfbase}{2017/03/23}{}{
   \msg_error:nnn{xsavebox}{support~outdated}{pdfbase.sty}
   \tex_endinput:D
 }
@@ -256,8 +264,8 @@
 }
 \ocgxii@stack@on@page{0}{} %initialize
 
-%end-of-page action in output routine
-\cs_new_nopar:Nn\ocgxii_at_end_page:{
+%end-of-page action
+\pbs_eop_action:n{
   %check whether end-of-page ocg stack has settled
   \iow_shipout:Nx\@mainaux{
     \token_to_str:N\ocgxii@newkey{ocgx2.oldstack.\int_use:N\g_ocgxii_page_int}{
@@ -284,19 +292,27 @@
   \seq_map_variable:cNn{
     g_pending_ocgs_on_\int_use:c{g_ocgxii_page_int}_seq
   }\l_ocgxii_arg_tl{
-    \ocgbase_oc_emc:
+    \str_if_eq_x:nnTF{\l_ocgxii_arg_tl}{(ocglink)}{
+      \ocgxii_colorlink_end:
+    }{
+      \ocgbase_oc_emc:
+    }
   }
 }
 
-%begin-of-page action in output routine
-\cs_new_nopar:Nn\ocgxii_at_begin_page:{
+%begin-of-page action (to output box background)
+\pbs_bop_action:n{
   % re-open pending ocgs
   \seq_set_eq:Nc\l_ocgxii_temp_seq{
     g_pending_ocgs_on_\int_use:c{g_ocgxii_page_int}_seq
   }
   \seq_reverse:N\l_ocgxii_temp_seq
   \seq_map_variable:NNn\l_ocgxii_temp_seq\l_ocgxii_arg_tl{
-    \ocgbase_oc_bdc:n{\l_ocgxii_arg_tl}
+    \str_if_eq_x:nnTF{\l_ocgxii_arg_tl}{(ocglink)}{
+      \ocgxii_colorlink_begin:
+    }{
+      \ocgbase_oc_bdc:n{\l_ocgxii_arg_tl}
+    }
   }
   \int_gincr:N\g_ocgxii_page_int
   % copy pending ocg stack from previous page, if it has not been initialized
@@ -310,17 +326,6 @@
   }
 }
 \int_new:N\g_ocgxii_page_int %abs. page counter
-
-%modify output routine to manage ocgs spanning multiple pages
-\cs_set_eq:NN\ocgxii_outputpage_orig:\@outputpage
-\cs_set_nopar:Npn\@outputpage{
-  \vbox_set:Nn\@outputbox{
-    \ocgxii_at_begin_page:
-    \box_use_clear:N\@outputbox
-    \ocgxii_at_end_page:
-  }
-  \ocgxii_outputpage_orig:
-}
 
 \cs_new_nopar:Nn\ocgxii_ocglist_reset:{
   \tl_clear_new:N\l_ocgxii_u_list_tl
@@ -595,52 +600,124 @@
   Line~\msg_line_number: :~unknown~option~`#1'.
 }
 
-\cs_gset_eq:NN\ocgxii_atenddvi_checkimpl_orig:\AtEndDvi@CheckImpl%
-\def\AtEndDvi@CheckImpl{
-  \ocgxii_atenddvi_checkimpl_orig:
-  \cs_if_exist:NTF\AtEndDvi@LastPage{
-    \int_compare:nF{\AtEndDvi@LastPage=\value{abspage}}{
-      \cs_if_exist:NF\g_ocgxii_rerunwarned_tl{
-        \tl_new:N\g_ocgxii_rerunwarned_tl
-        \msg_warning:nn{ocgx2}{rerun}
-      }
-    }
-  }{
-    \cs_if_exist:NF\g_ocgxii_rerunwarned_tl{
-      \tl_new:N\g_ocgxii_rerunwarned_tl
-      \msg_warning:nn{ocgx2}{rerun}
-    }
-  }
-}
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % patch hyperref to ensure compatibility with our `ocgcolorlinks' option
-% similar to http://tex.stackexchange.com/a/104227;
-% add `ocgcolorlinks' support to all drivers
+%
+% Plus:
+%
+% * add `ocgcolorlinks' support to all drivers
+%
+% * allows for `ocgcolorlinks' extending over
+%
+%      line-breaks AND page-breaks
+%
+%   with pdftex, luatex, xetex, dvipdfmx drivers
+%
+% based on Ben Lerner's solution
+%   http://tex.stackexchange.com/a/104227;
+% with some improvements
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\cs_new_nopar:Nn\ocgxii_enable_ocglinks:{
-  \def\Hy@colorlink##1{
-    \begingroup
-    \def\Hy@ocgcolor{##1}
-    \setbox0=\hbox\bgroup\color@begingroup\let\color@setgroup\begingroup
-  }
-  \def\Hy@endcolorlink{
-    \color@endgroup\egroup
-    \mbox{
-      \ocgbase@oc@bdc{\OBJ@OCG@print}
-      \rlap{\copy0}
-      \ocgbase@oc@emc\ocgbase@oc@bdc{\OBJ@OCG@view}
-      \begingroup
-        \expandafter\HyColor@UseColor\Hy@ocgcolor
-        \box0
-      \endgroup
-      \ocgbase@oc@emc
-    }
-    \endgroup
+\sys_if_output_pdf:TF{
+  \cs_new:Nn\ocgxii_literal_page:n{\pdfliteral~page~{#1}}
+}{
+  \bool_if:NT\g_ocgxii_dvipdfmx_bool{ %dvipdfmx/XeTeX
+    \cs_new:Nn\ocgxii_literal_page:n{\special{pdf:code~#1}}
   }
 }
 
-\bool_if:NT\l_ocgxii_ocgcolorlinks_bool{
+\bool_if:nTF{\sys_if_output_dvi_p: && !\g_ocgxii_dvipdfmx_bool}{
+  % non-breakable links in dvips
+  \cs_new_nopar:Nn\ocgxii_enable_ocglinks:{
+    \def\Hy@colorlink##1{
+      \begingroup
+      \def\Hy@ocgcolor{##1}
+      \setbox0=\hbox\bgroup\color@begingroup\let\color@setgroup\begingroup
+    }
+    \def\Hy@endcolorlink{
+      \color@endgroup\egroup
+      \mbox{
+        \ocgbase@oc@bdc{\OBJ@OCG@print}
+        \rlap{\copy0}
+        \ocgbase@oc@emc\ocgbase@oc@bdc{\OBJ@OCG@view}
+        \begingroup
+          \expandafter\HyColor@UseColor\Hy@ocgcolor
+          \box0
+        \endgroup
+        \ocgbase@oc@emc
+      }
+      \endgroup
+    }
+  }
+}{
+  % pdftex,luatex,xetex,dvipdfmx:
+  % ocgcolorlinks that extend over line and page breaks
+  \cs_new_nopar:Nn\ocgxii_enable_ocglinks:{
+    \def\Hy@colorlink##1{
+      \ifx\Hy@setbreaklinks\@gobble
+        \ifHy@breaklinks\Hy@breaklinkstrue\fi
+      \else
+        \Hy@breaklinkstrue
+      \fi
+      \ifHy@breaklinks
+        \seq_if_in:NnT\g_ocgbase_ocgstack_seq{(ocglink)}{
+          \msg_error:nn{ocgx2}{nested~breakable~ocgcolorlinks}
+        }
+        \ocgbase_ocgstack_push:n{(ocglink)}
+        \ocgxii_ocgstack_shipout:N\g_ocgbase_ocgstack_seq
+        \begingroup
+        \gdef\ocgxii@ocgcolor{##1}
+        \ocgxii_colorlink_begin:
+      \else
+        \begingroup
+        \def\ocgxii@ocgcolor{##1}
+        \setbox0=\hbox\bgroup\color@begingroup\let\color@setgroup\begingroup
+      \fi
+    }
+    \def\Hy@endcolorlink{
+      \ifHy@breaklinks
+        \ocgxii_colorlink_end:
+        \ocgbase_ocgstack_pop:N\l_trash_tl
+        \ocgxii_ocgstack_shipout:N\g_ocgbase_ocgstack_seq
+        \endgroup
+      \else
+        \color@endgroup\egroup
+        \mbox{
+          \ocgbase@oc@bdc{\OBJ@OCG@print}
+          \rlap{\copy0}
+          \ocgbase@oc@emc\ocgbase@oc@bdc{\OBJ@OCG@view}
+          \begingroup
+            \expandafter\HyColor@UseColor\ocgxii@ocgcolor
+            \box0
+          \endgroup
+          \ocgbase@oc@emc
+        }
+        \endgroup
+      \fi
+    }
+    \cs_new_nopar:Nn\ocgxii_colorlink_begin:{
+      \ocgxii_literal_page:n{q~7~Tr}
+      \vbox_to_zero:n{
+        \vss
+        \hbox_to_zero:n{\skip_horizontal:n{2\paperwidth}.\hss}
+        \skip_vertical:n{2\paperheight}
+      }
+    }
+    \cs_new_nopar:Nn\ocgxii_colorlink_end:{
+      \ocgbase@oc@bdc{\OBJ@OCG@print}
+        \ocgxii_literal_page:n{-88888~-88888~99999~99999~re~f}
+      \ocgbase@oc@emc
+      \ocgbase@oc@bdc{\OBJ@OCG@view}
+        \begingroup
+          \expandafter\HyColor@UseColor\ocgxii@ocgcolor
+          \ocgxii_literal_page:n{-88888~-88888~99999~99999~re~f}
+        \endgroup
+      \ocgbase@oc@emc
+      \ocgxii_literal_page:n{0~Tr~Q}
+    }
+  }
+}
+
+\bool_if:nT\l_ocgxii_ocgcolorlinks_bool{
   \@ifpackageloaded{hyperref}{
     \Hy@colorlinkstrue
     \Hy@AtBeginDocument{
@@ -654,6 +731,16 @@
     \msg_error:nnn{ocgx2}{missing~package}{hyperref}
   }
 }
+
+\msg_set:nnn{ocgx2}{nested~breakable~ocgcolorlinks}{
+  Breakable~OCG~color-links~cannot~be~nested.~Sorry.\\\\
+  Put\\\\
+  \space\space\string\hypersetup{breaklinks=false}...
+  \string\hypersetup{breaklinks=true}\\\\
+  around~the~outermost~of~a~group~of~nested~links.
+}
+\def\ocgxii@ocgcolor{{black}}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % tikz related code follows (to be enabled with package option `tikz')

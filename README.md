@@ -18,7 +18,7 @@ To enable dvipdfmx support, pass `dvipdfmx` globally as a class option.
 
 + layers extending across **page breaks**
 + grouping layers into **Radio Button Groups**
-+ OCG coloured links for hyperref, which are printed to paper in the default text colour
++ OCG coloured links for hyperref, which are printed to paper in the default text colour and which can extend over **line** and **page breaks**.
 
 Also, it adds some minor improvements and bug fixes, such as package options, remembering option settings of re-opened ocgs, correct behaviour of layer switching links that were themselves placed on layers, correct listing of (nested) ocgs in the layers tab of PDF viewers, compatibility with the `animate` and `media9` packages.
 

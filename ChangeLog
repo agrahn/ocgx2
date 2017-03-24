@@ -1,3 +1,9 @@
+2017-03-23
+	* v0.21 : ocgx2.sty
+	* v0.9  : ocgbase.sty
+	* fix: error when building document with nested OCGs
+	* new: ocgcolorlinks extending over line and page breaks
+
 2017-03-16
 	* v0.20 : ocgx2.sty
 	* v0.8  : ocgbase.sty

@@ -94,7 +94,6 @@
 % The Current Maintainer of this work is A. Grahn.
 
 \RequirePackage{expl3}
-\RequirePackage{atenddvi}
 \RequirePackage{pdfbase}
 
 \def\g@ocgbase@date@tl{2017/03/16}
@@ -107,7 +106,7 @@
 \seq_new:N\g_ocgbase_ocgorder_seq
 \seq_new:N\g_ocgbase_offocgs_seq
 
-\AtEndDvi{
+\pbs_at_end_dvi:n{
   \tl_if_empty:NF\g_ocgbase_ocgs_tl{
     %global OCG array
     \pbs_pdfobj:nnn{}{array}{\g_ocgbase_ocgs_tl}
