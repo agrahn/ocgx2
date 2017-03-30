@@ -1,4 +1,8 @@
 2017-03-30
+	* v0.24 : ocgx2.sty
+	* fix: \ocglinkprotect{...} messing up the graphics state (CTM)
+
+2017-03-30
 	* v0.23 : ocgx2.sty
 	* v0.10  : ocgbase.sty
 	* fix: nested ocgcolorlinks over multiple pages

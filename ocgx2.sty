@@ -38,7 +38,7 @@
 \RequirePackage{l3keys2e}
 
 \def\g@ocgxii@date@tl{2017/03/30}
-\def\g@ocgxii@version@tl{0.23}
+\def\g@ocgxii@version@tl{0.24}
 
 \ProvidesExplPackage{ocgx2}{\g@ocgxii@date@tl}{\g@ocgxii@version@tl}
 {ports `ocgx' functionality to dvips+ps2pdf, xelatex and dvipdfmx}
@@ -770,6 +770,11 @@
   \seq_get_left:NNT\g_ocgxii_lnk_color_seq\l_tmpa_tl{
       \ocgxii_colourlink_nobreak_end:
     \group_end:
+    \vbox_to_zero:n{ % avoid mixing up CTM
+      \vss
+      \hbox_to_zero:n{\skip_horizontal:n{2\paperwidth}.\hss}
+      \skip_vertical:n{2\paperheight}
+    }
     \ocgxii_colourlink_begin:
   }
 }
