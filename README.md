@@ -136,8 +136,7 @@ been provided:
 \toggleocgs[triggerocg=...]{<layer IDs to toggle, space separated>}{<link text>}
 \showocgs[triggerocg=...]{<layer IDs to switch ON, space separated>}{<link text>}
 \hideocgs[triggerocg=...]{<layer IDs to switch OFF, space separated>}{<link text>}
-\setocgs[triggerocg=...]{<IDs to toggle>}{<IDs to switch ON>}{<IDs to switch
-OFF>}{<link text>}
+\setocgs[triggerocg=...]{<IDs to toggle>}{<IDs to switch ON>}{<IDs to switch OFF>}{<link text>}
 ````
 See the `ocg-p` package manual for the meaning of `triggerocg=...`.
 
