@@ -96,11 +96,22 @@
 \RequirePackage{expl3}
 \RequirePackage{pdfbase}
 
-\def\g@ocgbase@date@tl{2017/03/16}
-\def\g@ocgbase@version@tl{0.8}
+\def\g@ocgbase@date@tl{2017/03/30}
+\def\g@ocgbase@version@tl{0.10}
 
 \ProvidesExplPackage{ocgbase}{\g@ocgbase@date@tl}{\g@ocgbase@version@tl}
 {support package for ocgx2.sty}
+
+\msg_set:nnnn{ocgbase}{support~outdated}{
+  Support~package~`#1'~too~old.
+}{
+  Get~an~up~to~date~version~of~`#1'.\\
+  Aborting.
+}
+\@ifpackagelater{pdfbase}{2017/03/23}{}{
+  \msg_error:nnn{ocgbase}{support~outdated}{pdfbase.sty}
+  \tex_endinput:D
+}
 
 \tl_new:N\g_ocgbase_ocgs_tl %takes ocg object refs
 \seq_new:N\g_ocgbase_ocgorder_seq
