@@ -1,3 +1,8 @@
+2017-04-25
+	* v0.25 : ocgx2.sty
+	* new:OCG  switching links (\showocg, \hideocg etc.) with hyperref look
+	& feel if hyperref is loaded (link border or colorlinks/ocgcolorlinks)
+
 2017-03-30
 	* v0.24 : ocgx2.sty
 	* fix: \ocglinkprotect{...} messing up the graphics state (CTM)

@@ -37,8 +37,8 @@
 \RequirePackage{xparse}
 \RequirePackage{l3keys2e}
 
-\def\g@ocgxii@date@tl{2017/03/30}
-\def\g@ocgxii@version@tl{0.24}
+\def\g@ocgxii@date@tl{2017/04/25}
+\def\g@ocgxii@version@tl{0.25}
 
 \ProvidesExplPackage{ocgx2}{\g@ocgxii@date@tl}{\g@ocgxii@version@tl}
 {ports `ocgx' functionality to dvips+ps2pdf, xelatex and dvipdfmx}
@@ -465,7 +465,10 @@
       \dim_use:N\box_ht:N\l_tmpa_box}{
       \dim_use:N\box_dp:N\l_tmpa_box
     }{
-      /Subtype/Widget/Ff~65536/FT/Btn/H/I
+      /Subtype/Widget/Ff~65536/FT/Btn/BS<</W~0>>
+      \cs_if_exist:NT\@pdfhighlight{
+        \ifx\@pdfhighlight\@empty\else/H\@pdfhighlight\fi
+      }
       /T~(ocgx2@\int_use:N\g_ocgxii_widcount_int)
       /AA <<
         \str_if_eq_x:nnF{}{
@@ -549,8 +552,20 @@
           \str_if_eq:VnF{\l_ocgxii_tohide_u_tl}{}{/OFF~\l_ocgxii_tohide_u_tl}
         ]
       >>
-      /Border [0~0~0]
-    }{#6}
+      %look and feel of hyperref links, if hyperref has been loaded
+      \cs_if_exist:NTF\Hy@setpdfborder{
+        \Hy@setpdfborder\g_ocgxii_patch_tl
+        \ifx\@pdfhighlight\@empty\else/H\@pdfhighlight\fi
+        \ifx\@linkbordercolor\relax\else/C[\@linkbordercolor]\fi
+        \ifHy@pdfa /F~4\fi
+      }{
+        /Border~[0~0~0]
+      }
+    }{
+      \cs_if_exist:NTF\Hy@colorlink{
+        \Hy@colorlink\@linkcolor#6\Hy@endcolorlink\Hy@VerboseLinkStop 
+      }{#6}
+    }
   }
 }
 
@@ -680,6 +695,7 @@
 }
 
 \seq_new:N\g_ocgxii_lnk_color_seq %stack of colours of currently open links
+\tl_new:N\g_ocgxii_patch_tl % `BorderArrayPatch' for dvips
 
 \bool_if:nTF{\sys_if_output_dvi_p: && !\g_ocgxii_dvipdfmx_bool}{
   % non-breakable links in dvips
@@ -694,6 +710,7 @@
       \group_end:
     }
   }
+  \tl_gset:Nn\g_ocgxii_patch_tl{BorderArrayPatch}
 }{
   % pdftex,luatex,xetex,dvipdfmx:
   % ocgcolorlinks that extend over line and page breaks
@@ -796,7 +813,7 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% tikz related code follows (to be enabled with package option `tikz')
+% TikZ related code follows (to be enabled with package option `tikz')
 
 \bool_if:NF\l_ocgxii_tikz_bool{\endinput}
 \ExplSyntaxOff
