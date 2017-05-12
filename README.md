@@ -7,10 +7,10 @@ https://github.com/agrahn/ocgx2
 ## Introduction
 
 This package serves as a drop-in replacement for the already existing packages
-`ocgx` by Paul Gaborit and `ocg-p` by Werner Moshammer for the creation of PDF
+**`ocgx`** by Paul Gaborit and **`ocg-p`** by Werner Moshammer for the creation of PDF
 Layers.
 
-It re-implements the functionality of the `ocg`, `ocgx` and `ocg-p` packages and
+It re-implements the functionality of the **`ocg`**, **`ocgx`** and **`ocg-p`** packages and
 adds support for all known engines and back-ends including:
 
 - LaTeX &rArr; dvips &rArr; ps2pdf/Distiller
@@ -24,15 +24,15 @@ of (nested) OCGs in the layers tab of PDF viewers, compatibility with the
 `animate` and `media9` packages, a re-implementation of **`hyperref`**'s
 **`ocgcolorlink`** option.
 
-To enable dvipdfmx support, pass `dvipdfmx` globally as a class option.
+To enable dvipdfmx support, pass **`dvipdfmx`** globally as a class option.
 
 ----
 
 *New features:*
 
 + layers extending across **page breaks**
-+ grouping layers into **Radio Button Groups**
-+ re-implementing `hyperref`'s `ocgcolorlinks` option
++ grouping layers into **Radio Button Groups** (`ocg` environment option **`radiobtngrp=...`**)
++ re-implementing **`hyperref`**'s **`ocgcolorlinks`** option
 
 for creating OCG coloured links, which are printed on paper in the default
 text colour and which can, unlike the original `hyperref` implementation,

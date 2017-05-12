@@ -37,8 +37,8 @@
 \RequirePackage{xparse}
 \RequirePackage{l3keys2e}
 
-\def\g@ocgxii@date@tl{2017/04/25}
-\def\g@ocgxii@version@tl{0.25}
+\def\g@ocgxii@date@tl{2017/05/12}
+\def\g@ocgxii@version@tl{0.26}
 
 \ProvidesExplPackage{ocgx2}{\g@ocgxii@date@tl}{\g@ocgxii@version@tl}
 {ports `ocgx' functionality to dvips+ps2pdf, xelatex and dvipdfmx}
@@ -49,8 +49,11 @@
 \AtBeginDocument{
   \iow_now:Nx\@mainaux{
     \token_to_str:N\providecommand\token_to_str:N\ocgxii@newkey[2]{}
-    \token_to_str:N\providecommand
-      \token_to_str:N\ocgxii@ocg@stack@on@page[2]{}
+  }
+  \iow_now:Nx\@mainaux{
+    \token_to_str:N\providecommand\token_to_str:N\ocgxii@ocg@stack@on@page[2]{}
+  }
+  \iow_now:Nx\@mainaux{
     \token_to_str:N\providecommand
       \token_to_str:N\ocgxii@lnkcol@stack@on@page[2]{}
   }
@@ -563,7 +566,7 @@
       }
     }{
       \cs_if_exist:NTF\Hy@colorlink{
-        \Hy@colorlink\@linkcolor#6\Hy@endcolorlink\Hy@VerboseLinkStop 
+        \Hy@colorlink\@linkcolor#6\Hy@endcolorlink\Hy@VerboseLinkStop
       }{#6}
     }
   }
@@ -683,9 +686,10 @@
 \cs_new_nopar:Nn\ocgxii_colourlink_nobreak_end:{
   \color@endgroup\egroup
   \mbox{
-    \ocgbase_oc_bdc:n{\g_ocgxii_ocgprint_tl}
+    \ocgbase_oc_bdc:n{\ocgxii@OCPrint}
     \hbox_to_zero:n{\box_use:N0\hss}
-    \ocgbase_oc_emc:\ocgbase_oc_bdc:n{\g_ocgxii_ocgview_tl}
+    \ocgbase_oc_emc:
+    \ocgbase_oc_bdc:n{\ocgxii@OCView}
     \group_begin:
       \exp_after:wN\HyColor@UseColor\l_ocgxii_lnkcol_tl
       \box_use_clear:N0
@@ -760,10 +764,10 @@
       \hbox_to_zero:n{\skip_horizontal:n{2\paperwidth}.\hss}
       \skip_vertical:n{2\paperheight}
     }
-    \ocgbase_oc_bdc:n{\g_ocgxii_ocgprint_tl}
+    \ocgbase_oc_bdc:n{\ocgxii@OCPrint}
       \ocgxii_literal_page:n{-88888~-88888~99999~99999~re~f}
     \ocgbase_oc_emc:
-    \ocgbase_oc_bdc:n{\g_ocgxii_ocgview_tl}
+    \ocgbase_oc_bdc:n{\ocgxii@OCView}
       \group_begin:
         \exp_after:wN\HyColor@UseColor\g_ocgxii_lnkcol_tl
         \ocgxii_literal_page:n{-88888~-88888~99999~99999~re~f}
@@ -799,12 +803,20 @@
 \bool_if:NT\l_ocgxii_ocgcolorlinks_bool{
   \@ifpackageloaded{hyperref}{
     \Hy@colorlinkstrue
-    \Hy@AtBeginDocument{
+    \AtBeginDocument{
       \ocgbase_new_ocg:nnn{OCView}{/Print<</PrintState/OFF>>}{on}
-      \tl_gset:Nx\g_ocgxii_ocgview_tl{\ocgbase_last_ocg:}
+      \tl_gset:Nx\ocgxii@OCView{\ocgbase_last_ocg:}
+      \tl_gset:cx{ocgxii@OCView.opts}{showingui=never,printocg=never}
       \ocgbase_new_ocg:nnn{OCPrint}{/Print<</PrintState/ON>>}{off}
-      \tl_gset:Nx\g_ocgxii_ocgprint_tl{\ocgbase_last_ocg:}
+      \tl_gset:Nx\ocgxii@OCPrint{\ocgbase_last_ocg:}
+      \tl_gset:cx{ocgxii@OCPrint.opts}{showingui=never,printocg=always}
       \ocgxii_enable_ocglinks:
+      \iow_now:Nx\@mainaux{
+        \token_to_str:N\ocgxii@newkey{ocgx2.ocg.OCView}{\ocgxii@OCView}
+      }
+      \iow_now:Nx\@mainaux{
+        \token_to_str:N\ocgxii@newkey{ocgx2.ocg.OCPrint}{\ocgxii@OCPrint}
+      }
     }
   }{
     \msg_error:nnn{ocgx2}{missing~package}{hyperref}
