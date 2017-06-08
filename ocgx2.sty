@@ -37,8 +37,8 @@
 \RequirePackage{xparse}
 \RequirePackage{l3keys2e}
 
-\def\g@ocgxii@date@tl{2017/05/12}
-\def\g@ocgxii@version@tl{0.26}
+\def\g@ocgxii@date@tl{2017/06/08}
+\def\g@ocgxii@version@tl{0.29}
 
 \ProvidesExplPackage{ocgx2}{\g@ocgxii@date@tl}{\g@ocgxii@version@tl}
 {ports `ocgx' functionality to dvips+ps2pdf, xelatex and dvipdfmx}
@@ -681,18 +681,19 @@
 \cs_new_nopar:Nn\ocgxii_colourlink_begin:{}
 \cs_new_nopar:Nn\ocgxii_colourlink_end:{}
 \cs_new_nopar:Nn\ocgxii_colourlink_nobreak_begin:{
-  \hbox_set:Nn0\bgroup\color@begingroup\tl_set_eq:NN\color@setgroup\group_begin:
+  \hbox_set:Nw\l_tmpa_box\color@begingroup
+    \tl_set_eq:NN\color@setgroup\group_begin:
 }
 \cs_new_nopar:Nn\ocgxii_colourlink_nobreak_end:{
-  \color@endgroup\egroup
+  \color@endgroup\hbox_set_end:
   \mbox{
     \ocgbase_oc_bdc:n{\ocgxii@OCPrint}
-    \hbox_to_zero:n{\box_use:N0\hss}
+    \hbox_to_zero:n{\box_use:N\l_tmpa_box\hss}
     \ocgbase_oc_emc:
     \ocgbase_oc_bdc:n{\ocgxii@OCView}
     \group_begin:
       \exp_after:wN\HyColor@UseColor\l_ocgxii_lnkcol_tl
-      \box_use_clear:N0
+      \box_use_clear:N\l_tmpa_box
     \group_end:
     \ocgbase_oc_emc:
   }
