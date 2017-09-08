@@ -148,23 +148,12 @@
 }
 
 \cs_new_nopar:Nn\ocgxii_beginocg:nnnn{
-  \bool_if:NT\g_ocgxii_nestedB_bool{
-    \seq_gput_left:Nx\g_ocgxii_nested_seq{\ocgbase_ocgstack_top:}
-    \ocgbase_add_to_order_list:n{[}
-  }
-  \bool_gset_true:N\g_ocgxii_nestedB_bool
-  \bool_gset_false:N\g_ocgxii_nestedE_bool
   \group_begin:
     \ocgxii_reset_cmd_opts:  % ... to the user-set package options
     \tl_if_exist:cTF{ocgxii@#3}{ %re-open existing layer
       \tl_set:Nx\l_tempa_tl{\tl_use:c{ocgxii@#3.opts},#1}
       \tl_gset:cx{ocgxii@#3.opts}{\l_tempa_tl} %new options appended
       \keys_set:nV{ocgx2/user}\l_tempa_tl
-      \int_compare:nTF{\l_ocgxii_listno_tl=\c_zero}{
-        \ocgbase_add_to_order_list:n{\tl_use:c{ocgxii@#3}}
-      }{
-        \bool_gset_false:N\g_ocgxii_nestedB_bool
-      }
       \bool_if:nTF{ %initial visibility
         \str_if_eq_x_p:nn{#4}{1} ||
         \str_if_eq_x_p:nn{#4}{on} ||
@@ -182,18 +171,8 @@
         \l_ocgxii_view_tl\l_ocgxii_print_tl\l_ocgxii_export_tl
       }{#4}
       \tl_gset:cx{ocgxii@#3}{\ocgbase_last_ocg:}
-      \int_compare:nTF{\l_ocgxii_listno_tl=\c_one}{
-        \bool_gset_false:N\g_ocgxii_nestedB_bool
-      }{
-        \ocgbase_add_to_order_list:n{\ocgbase_last_ocg:}
-      }
       \iow_now:Nx\@mainaux{
         \token_to_str:N\ocgxii@newkey{ocgx2.ocg.#3}{\ocgbase_last_ocg:}
-      }
-    }
-    \seq_map_inline:Nn\l_ocgxii_rbgrps_seq{% process list of radio btn groups
-      \ocgbase_add_ocg_to_radiobtn_grp:nnn{##1}{\tl_use:c{ocgxii@#3}}{
-        \int_compare:nTF{\l_ocgxii_listno_tl=\c_one}{false}{true}
       }
     }
     \bool_if:nT{
@@ -209,8 +188,15 @@
       }
     }
     \tl_gset:cx{ocgx2.ocg.#3}{\tl_use:c{ocgxii@#3}}
-    \ocgbase_ocgstack_push:n{\tl_use:c{ocgxii@#3}}
-    \ocgxii_stack_shipout:NN\ocgxii@ocg@stack@on@page\g_ocgbase_ocgstack_seq
+    \seq_map_inline:Nn\l_ocgxii_rbgrps_seq{% process list of radio btn groups
+      \ocgbase_add_ocg_to_radiobtn_grp:nn{##1}{\tl_use:c{ocgxii@#3}}
+    }
+    \ocgbase_open_stack_push:n{\tl_use:c{ocgxii@#3}}
+    \ocgxii_stack_shipout:NN\ocgxii@ocg@stack@on@page\g_ocgbase_open_stack_seq
+    % insert OCG into Order tree
+    \int_compare:nT{\l_ocgxii_listno_tl!=\c_one}{
+      \ocgbase_insert_ocg_in_tree:n{\tl_use:c{ocgxii@#3}}
+    }
   \group_end:
   \ocgbase_oc_bdc:n{\tl_use:c{ocgxii@#3}}
   \ignorespaces
@@ -219,26 +205,9 @@
 \cs_new_nopar:Nn\ocgxii_endocg:{
   \unskip
   \ocgbase_oc_emc:
-  \bool_if:nT{
-    \g_ocgxii_nestedE_bool &&
-    \str_if_eq_x_p:nn{
-      \seq_item:Nn\g_ocgxii_nested_seq{\c_one}
-    }{
-      \ocgbase_ocgstack_top:
-    }
-  }{
-    \ocgbase_add_to_order_list:n{]}
-    \seq_gpop_left:NN\g_ocgxii_nested_seq\l_trash_tl
-  }
-  \ocgbase_ocgstack_pop:N\l_trash_tl
-  \ocgxii_stack_shipout:NN\ocgxii@ocg@stack@on@page\g_ocgbase_ocgstack_seq
-  \bool_gset_false:N\g_ocgxii_nestedB_bool
-  \bool_gset_true:N\g_ocgxii_nestedE_bool
+  \ocgbase_open_stack_pop:N\l_trash_tl
+  \ocgxii_stack_shipout:NN\ocgxii@ocg@stack@on@page\g_ocgbase_open_stack_seq
 }
-
-\bool_new:N\g_ocgxii_nestedB_bool % nested OCG begin
-\bool_new:N\g_ocgxii_nestedE_bool % nested OCG end
-\seq_new:N\g_ocgxii_nested_seq % for keeping track of parent OCGs
 
 \cs_new_nopar:Nn\ocgxii_stack_shipout:NN{
   \iow_shipout_x:Nx\@mainaux{
@@ -630,7 +599,9 @@
   showingui .default:n={iffirstuse},
 
   radiobtngrp .code:n = {
-    \seq_put_right:Nx\l_ocgxii_rbgrps_seq{#1}
+    \seq_if_in:NxF\l_ocgxii_rbgrps_seq{#1}{
+      \seq_put_right:Nx\l_ocgxii_rbgrps_seq{#1}
+    }
   },
   radiobtngrp .value_required:n = {true}
 }
