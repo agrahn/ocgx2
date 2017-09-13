@@ -384,13 +384,13 @@
 
 \int_new:N\g_ocgxii_widcount_int% widget counter
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % re-implement commands from ocgx.sty (all engines including ps2pdf [gs>=9.15])
-% adding optional `*` (arg 1) -> non-breakable Button Widget & mouse-up trigger
-%   instead of plain (multiline) Link
-% adding optional 2nd argument -> Button Widget with one of various mouse
-% triggers
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% adding optional `*` (arg 1) -> non-breakable link instead of plain (multiline)
+% Link;
+% adding optional 2nd argument -> Button Widget (non-breakable) with one of
+% various mouse triggers (`troggerocgs` option from ocg-p)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \DeclareDocumentCommand\switchocg{s o m +m}{
   \ocgxii_actionsocg:nnnnnn{#1}{#2}{#3}{}{}{#4}
 }
@@ -407,114 +407,154 @@
   \ocgxii_actionsocg:nnnnnn{#1}{#2}{#3}{#4}{#5}{#6}
 }
 
+\bool_new:N\l_ocgxii_mouse_triggers_bool
+\bool_new:N\l_ocgxii_nobreak_bool
 \cs_new:Nn\ocgxii_actionsocg:nnnnnn{
   \leavevmode
-  \bool_if:nTF{#1 || \IfValueTF{#2}{\c_true_bool}{\c_false_bool}}{
-    % implemented as Widget annot (non-breakable)
-    \ocgxii_ocglist_process_idlist:nn{
-      \IfValueTF{#2}{#2}{triggerocg=onmouseup}
-    }{#3}
-    \tl_set_eq:NN\l_ocgxii_toswitch_e_tl\l_ocgxii_e_list_tl
-    \tl_set_eq:NN\l_ocgxii_toswitch_x_tl\l_ocgxii_x_list_tl
-    \tl_set_eq:NN\l_ocgxii_toswitch_d_tl\l_ocgxii_d_list_tl
-    \tl_set_eq:NN\l_ocgxii_toswitch_u_tl\l_ocgxii_u_list_tl
-    \ocgxii_ocglist_process_idlist:nn{
-      \IfValueTF{#2}{#2}{triggerocg=onmouseup}
-    }{#4}
-    \tl_set_eq:NN\l_ocgxii_toshow_e_tl\l_ocgxii_e_list_tl
-    \tl_set_eq:NN\l_ocgxii_toshow_x_tl\l_ocgxii_x_list_tl
-    \tl_set_eq:NN\l_ocgxii_toshow_d_tl\l_ocgxii_d_list_tl
-    \tl_set_eq:NN\l_ocgxii_toshow_u_tl\l_ocgxii_u_list_tl
-    \ocgxii_ocglist_process_idlist:nn{
-      \IfValueTF{#2}{#2}{triggerocg=onmouseup}
-    }{#5}
-    \tl_set_eq:NN\l_ocgxii_tohide_e_tl\l_ocgxii_e_list_tl
-    \tl_set_eq:NN\l_ocgxii_tohide_x_tl\l_ocgxii_x_list_tl
-    \tl_set_eq:NN\l_ocgxii_tohide_d_tl\l_ocgxii_d_list_tl
-    \tl_set_eq:NN\l_ocgxii_tohide_u_tl\l_ocgxii_u_list_tl
+  \bool_set_false:N\l_ocgxii_mouse_triggers_bool
+  \bool_set_false:N\l_ocgxii_nobreak_bool
+  % explicitly non-breakable?
+  \bool_if:nT{#1}{\bool_set_true:N\l_ocgxii_nobreak_bool}
+  %
+  %clear actions for various mouse triggers (e,d,x)
+  \tl_clear:N\l_ocgxii_toswitch_e_tl
+  \tl_clear:N\l_ocgxii_toswitch_x_tl
+  \tl_clear:N\l_ocgxii_toswitch_d_tl
+  \tl_clear:N\l_ocgxii_toshow_e_tl
+  \tl_clear:N\l_ocgxii_toshow_x_tl
+  \tl_clear:N\l_ocgxii_toshow_d_tl
+  \tl_clear:N\l_ocgxii_tohide_e_tl
+  \tl_clear:N\l_ocgxii_tohide_x_tl
+  \tl_clear:N\l_ocgxii_tohide_d_tl
+  %
+  %process *all* mouse triggers (e,d,u,x)
+  \ocgxii_ocglist_process_idlist:nn{
+    \IfValueTF{#2}{#2}{triggerocg=onmouseup}
+  }{#3}
+  \tl_set_eq:NN\l_ocgxii_toswitch_e_tl\l_ocgxii_e_list_tl
+  \tl_set_eq:NN\l_ocgxii_toswitch_x_tl\l_ocgxii_x_list_tl
+  \tl_set_eq:NN\l_ocgxii_toswitch_d_tl\l_ocgxii_d_list_tl
+  \tl_set_eq:NN\l_ocgxii_toswitch_u_tl\l_ocgxii_u_list_tl
+  \ocgxii_ocglist_process_idlist:nn{
+    \IfValueTF{#2}{#2}{triggerocg=onmouseup}
+  }{#4}
+  \tl_set_eq:NN\l_ocgxii_toshow_e_tl\l_ocgxii_e_list_tl
+  \tl_set_eq:NN\l_ocgxii_toshow_x_tl\l_ocgxii_x_list_tl
+  \tl_set_eq:NN\l_ocgxii_toshow_d_tl\l_ocgxii_d_list_tl
+  \tl_set_eq:NN\l_ocgxii_toshow_u_tl\l_ocgxii_u_list_tl
+  \ocgxii_ocglist_process_idlist:nn{
+    \IfValueTF{#2}{#2}{triggerocg=onmouseup}
+  }{#5}
+  \tl_set_eq:NN\l_ocgxii_tohide_e_tl\l_ocgxii_e_list_tl
+  \tl_set_eq:NN\l_ocgxii_tohide_x_tl\l_ocgxii_x_list_tl
+  \tl_set_eq:NN\l_ocgxii_tohide_d_tl\l_ocgxii_d_list_tl
+  \tl_set_eq:NN\l_ocgxii_tohide_u_tl\l_ocgxii_u_list_tl
+  %any triggers apart from mouse-up?
+  \str_if_eq_x:nnF{
+    \l_ocgxii_toswitch_e_tl\l_ocgxii_toswitch_x_tl\l_ocgxii_toswitch_d_tl
+    \l_ocgxii_toshow_e_tl\l_ocgxii_toshow_x_tl\l_ocgxii_toshow_d_tl
+    \l_ocgxii_tohide_e_tl\l_ocgxii_tohide_x_tl\l_ocgxii_tohide_d_tl
+  }{}{
+    \bool_set_true:N\l_ocgxii_mouse_triggers_bool
+  }
+  %
+  \bool_if:nTF{\l_ocgxii_nobreak_bool || \l_ocgxii_mouse_triggers_bool}{
     \hbox_set:Nn\l_tmpa_box{#6}
     \pbs_pdfannot:nnnn{
       \dim_use:N\box_wd:N\l_tmpa_box}{
       \dim_use:N\box_ht:N\l_tmpa_box}{
       \dim_use:N\box_dp:N\l_tmpa_box
     }{
-      /Subtype/Widget/Ff~65536/FT/Btn/BS<</W~0>>
+      \bool_if:NTF\l_ocgxii_mouse_triggers_bool{
+        % e,d,x mouse triggers require (non-breakable) /Widget annot with AA
+        % (additional actions) dict
+        /Subtype/Widget/Ff~65536/FT/Btn/BS<</W~0>>
+        /T~(ocgx2@\int_use:N\g_ocgxii_widcount_int)
+        /AA <<
+          \str_if_eq_x:nnF{}{
+            \l_ocgxii_toswitch_u_tl\l_ocgxii_toshow_u_tl\l_ocgxii_tohide_u_tl
+          }{
+            /U <</S/SetOCGState/State [
+              \str_if_eq:VnF\l_ocgxii_toswitch_u_tl{}{
+                /Toggle~\l_ocgxii_toswitch_u_tl
+              }
+              \str_if_eq:VnF\l_ocgxii_toshow_u_tl{}{
+                /ON~\l_ocgxii_toshow_u_tl
+              }
+              \str_if_eq:VnF\l_ocgxii_tohide_u_tl{}{
+                /OFF~\l_ocgxii_tohide_u_tl
+              }
+            ]>>
+          }
+          \str_if_eq_x:nnF{}{
+            \l_ocgxii_toswitch_d_tl\l_ocgxii_toshow_d_tl\l_ocgxii_tohide_d_tl
+          }{
+            /D <</S/SetOCGState/State [
+              \str_if_eq:VnF\l_ocgxii_toswitch_d_tl{}{
+                /Toggle~\l_ocgxii_toswitch_d_tl
+              }
+              \str_if_eq:VnF\l_ocgxii_toshow_d_tl{}{
+                /ON~\l_ocgxii_toshow_d_tl
+              }
+              \str_if_eq:VnF\l_ocgxii_tohide_d_tl{}{
+                /OFF~\l_ocgxii_tohide_d_tl
+              }
+            ]>>
+          }
+          \str_if_eq_x:nnF{}{
+            \l_ocgxii_toswitch_e_tl\l_ocgxii_toshow_e_tl\l_ocgxii_tohide_e_tl
+          }{
+            /E <</S/SetOCGState/State [
+              \str_if_eq:VnF\l_ocgxii_toswitch_e_tl{}{
+                /Toggle~\l_ocgxii_toswitch_e_tl
+              }
+              \str_if_eq:VnF\l_ocgxii_toshow_e_tl{}{
+                /ON~\l_ocgxii_toshow_e_tl
+              }
+              \str_if_eq:VnF\l_ocgxii_tohide_e_tl{}{
+                /OFF~\l_ocgxii_tohide_e_tl
+              }
+            ]>>
+          }
+          \str_if_eq_x:nnF{}{
+            \l_ocgxii_toswitch_x_tl\l_ocgxii_toshow_x_tl\l_ocgxii_tohide_x_tl
+          }{
+            /X <</S/SetOCGState/State [
+              \str_if_eq:VnF\l_ocgxii_toswitch_x_tl{}{
+                /Toggle~\l_ocgxii_toswitch_x_tl
+              }
+              \str_if_eq:VnF\l_ocgxii_toshow_x_tl{}{
+                /ON~\l_ocgxii_toshow_x_tl
+              }
+              \str_if_eq:VnF\l_ocgxii_tohide_x_tl{}{
+                /OFF~\l_ocgxii_tohide_x_tl
+              }
+            ]>>
+          }
+        >>
+      }{
+        %mouse-up only only needs annot with /Link subtype
+        /Subtype/Link
+        /A <</S/SetOCGState
+          /State [
+            \str_if_eq:VnF{\l_ocgxii_toswitch_u_tl}{}{
+              /Toggle~\l_ocgxii_toswitch_u_tl}~
+            \str_if_eq:VnF{\l_ocgxii_toshow_u_tl}{}{/ON~\l_ocgxii_toshow_u_tl}~
+            \str_if_eq:VnF{\l_ocgxii_tohide_u_tl}{}{/OFF~\l_ocgxii_tohide_u_tl}
+          ]
+        >>
+        /Border~[0~0~0]
+      }
       \cs_if_exist:NT\@pdfhighlight{
         \ifx\@pdfhighlight\@empty\else/H\@pdfhighlight\fi
       }
-      /T~(ocgx2@\int_use:N\g_ocgxii_widcount_int)
-      /AA <<
-        \str_if_eq_x:nnF{}{
-          \l_ocgxii_toswitch_u_tl\l_ocgxii_toshow_u_tl\l_ocgxii_tohide_u_tl
-        }{
-          /U <</S/SetOCGState/State [
-            \str_if_eq:VnF\l_ocgxii_toswitch_u_tl{}{
-              /Toggle~\l_ocgxii_toswitch_u_tl
-            }
-            \str_if_eq:VnF\l_ocgxii_toshow_u_tl{}{
-              /ON~\l_ocgxii_toshow_u_tl
-            }
-            \str_if_eq:VnF\l_ocgxii_tohide_u_tl{}{
-              /OFF~\l_ocgxii_tohide_u_tl
-            }
-          ]>>
-        }
-        \str_if_eq_x:nnF{}{
-          \l_ocgxii_toswitch_d_tl\l_ocgxii_toshow_d_tl\l_ocgxii_tohide_d_tl
-        }{
-          /D <</S/SetOCGState/State [
-            \str_if_eq:VnF\l_ocgxii_toswitch_d_tl{}{
-              /Toggle~\l_ocgxii_toswitch_d_tl
-            }
-            \str_if_eq:VnF\l_ocgxii_toshow_d_tl{}{
-              /ON~\l_ocgxii_toshow_d_tl
-            }
-            \str_if_eq:VnF\l_ocgxii_tohide_d_tl{}{
-              /OFF~\l_ocgxii_tohide_d_tl
-            }
-          ]>>
-        }
-        \str_if_eq_x:nnF{}{
-          \l_ocgxii_toswitch_e_tl\l_ocgxii_toshow_e_tl\l_ocgxii_tohide_e_tl
-        }{
-          /E <</S/SetOCGState/State [
-            \str_if_eq:VnF\l_ocgxii_toswitch_e_tl{}{
-              /Toggle~\l_ocgxii_toswitch_e_tl
-            }
-            \str_if_eq:VnF\l_ocgxii_toshow_e_tl{}{
-              /ON~\l_ocgxii_toshow_e_tl
-            }
-            \str_if_eq:VnF\l_ocgxii_tohide_e_tl{}{
-              /OFF~\l_ocgxii_tohide_e_tl
-            }
-          ]>>
-        }
-        \str_if_eq_x:nnF{}{
-          \l_ocgxii_toswitch_x_tl\l_ocgxii_toshow_x_tl\l_ocgxii_tohide_x_tl
-        }{
-          /X <</S/SetOCGState/State [
-            \str_if_eq:VnF\l_ocgxii_toswitch_x_tl{}{
-              /Toggle~\l_ocgxii_toswitch_x_tl
-            }
-            \str_if_eq:VnF\l_ocgxii_toshow_x_tl{}{
-              /ON~\l_ocgxii_toshow_x_tl
-            }
-            \str_if_eq:VnF\l_ocgxii_tohide_x_tl{}{
-              /OFF~\l_ocgxii_tohide_x_tl
-            }
-          ]>>
-        }
-      >>
     }\box_use_clear:N\l_tmpa_box
-    \pbs_appendtofields:n{\pbs_pdflastann:}
-    \int_gincr:N\g_ocgxii_widcount_int
+    \bool_if:NT\l_ocgxii_mouse_triggers_bool{
+      \pbs_appendtofields:n{\pbs_pdflastann:}
+      \int_gincr:N\g_ocgxii_widcount_int
+    }
   }{
-    \ocgxii_ocglist_process_idlist:nn{triggerocg=onmouseup}{#3}
-    \tl_set_eq:NN\l_ocgxii_toswitch_u_tl\l_ocgxii_u_list_tl
-    \ocgxii_ocglist_process_idlist:nn{triggerocg=onmouseup}{#4}
-    \tl_set_eq:NN\l_ocgxii_toshow_u_tl\l_ocgxii_u_list_tl
-    \ocgxii_ocglist_process_idlist:nn{triggerocg=onmouseup}{#5}
-    \tl_set_eq:NN\l_ocgxii_tohide_u_tl\l_ocgxii_u_list_tl
+    %line-breakable annotation
     \pbs_pdflink:nn{
       /Subtype/Link
       /A <</S/SetOCGState
@@ -644,9 +684,11 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \sys_if_output_pdf:TF{
   \cs_new:Nn\ocgxii_literal_page:n{\pdfliteral~page~{#1}}
+%  \cs_new:Nn\ocgxii_literal_page:n{\pdfliteral~direct~{#1}}
 }{
   \bool_if:NT\g_ocgxii_dvipdfmx_bool{ %dvipdfmx/XeTeX
     \cs_new:Nn\ocgxii_literal_page:n{\special{pdf:code~#1}}
+%    \cs_new:Nn\ocgxii_literal_page:n{\special{pdf:literal~direct~#1}}
   }
 }
 
@@ -732,10 +774,15 @@
     \ocgxii_literal_page:n{q~7~Tr}
   }
   \cs_gset_nopar:Nn\ocgxii_colourlink_end:{
-    \vbox_to_zero:n{
-      \vss
-      \hbox_to_zero:n{\skip_horizontal:n{2\paperwidth}.\hss}
-      \skip_vertical:n{2\paperheight}
+    %this should keep empty link annots from flooding the page with link
+    %colour by placing a default glyph (`.') off the page limits;
+    %only works with pdfLaTeX/LuaLaTeX
+    \sys_if_output_pdf:T{
+      \vbox_to_zero:n{
+        \vss
+        \hbox_to_zero:n{\skip_horizontal:n{2\paperwidth}.\hss}
+        \skip_vertical:n{2\paperheight}
+      }
     }
     \ocgbase_oc_bdc:n{\ocgxii@OCPrint}
       \ocgxii_literal_page:n{-88888~-88888~99999~99999~re~f}
@@ -764,11 +811,11 @@
   \seq_get_left:NNT\g_ocgxii_lnk_color_seq\l_tmpa_tl{
       \ocgxii_colourlink_nobreak_end:
     \group_end:
-    \vbox_to_zero:n{ % avoid mixing up CTM
+    \sys_if_output_pdf:T{\vbox_to_zero:n{ % avoid mixing up CTM
       \vss
       \hbox_to_zero:n{\skip_horizontal:n{2\paperwidth}.\hss}
       \skip_vertical:n{2\paperheight}
-    }
+    }}
     \ocgxii_colourlink_begin:
   }
 }
@@ -855,7 +902,7 @@
   switch ocg with mark on/.style 2 args={
     postaction={
       path picture={
-        \begin{ocg}{#1}{#1}{1}
+        \begin{ocg}[showingui=never]{#1}{#1}{1}
           \draw
           (path picture bounding box.south west)
           --
@@ -872,7 +919,7 @@
   switch ocg with mark off/.style 2 args={
     postaction={
       path picture={
-        \begin{ocg}{#1}{#1}{0}
+        \begin{ocg}[showingui=never]{#1}{#1}{0}
           \draw
           (path picture bounding box.south west)
           --
