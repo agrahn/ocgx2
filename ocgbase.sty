@@ -40,11 +40,13 @@
 %
 %   --------
 %
-%   \ocgbase_insert_ocg_in_tree:n
-%   \ocgbase@insert@ocg@in@tree (LaTeX2e version)
-%     #1: PDF object ID of OCG
-%     Only OCGs added to the global `Order' list using this command will show
-%     up in the Layers Tab
+%   \ocgbase_tree_node_begin:n
+%   \ocgbase_tree_node_end:
+%   \ocgbase@tree@node@begin (LaTeX2e versions)
+%   \ocgbase@tree@node@end
+%     #1: OCG PDF object
+%     macro pair (begin and end) for inserting OCG object and its children
+%     into Order hierarchy (shown as tree structure in the viewers `Layers' tab
 %
 %   --------
 %
@@ -191,14 +193,17 @@
 
 \cs_new_nopar:Nn\ocgbase_last_ocg:{\g_ocgbase_last_ocg_tl}
 
-\int_new:N\g_ocgbase_nd_int             %node id
-\seq_new:N\g_ocgbase_nd_stack_seq       %stack with open ocg nodes
-\seq_gpush:Nn\g_ocgbase_nd_stack_seq{0} %push root node
+\int_new:N\g_ocgbase_nd_int    %node id
+\seq_new:N\g_ocgbase_tree_nd_stack_seq    %stack with open ocg node id
+\seq_new:N\g_ocgbase_tree_ocg_stack_seq    %stack with open ocg obj number
+\seq_gpush:Nn\g_ocgbase_tree_nd_stack_seq{0}    %push root node
+\seq_gpush:Nn\g_ocgbase_tree_ocg_stack_seq{null}    %push root node
 
-%macro to insert OCG PDF object into Order hierarchy
-\cs_new:Nn\ocgbase_insert_ocg_in_tree:n{ % #1: OCG obj
+%macro for starting OCG object (and nested children) insertion into Order
+%hierarchy (shown as tree structure in the viewers `Layers' tab
+\cs_new:Nn\ocgbase_tree_node_begin:n{ % #1: OCG obj
   %get the parent node from stack
-  \seq_get:NN\g_ocgbase_nd_stack_seq\l__ocgbase_prnt_tl
+  \seq_get:NN\g_ocgbase_tree_nd_stack_seq\l__ocgbase_prnt_tl
   \tl_if_exist:cTF{g_ocgbase_nd_\l__ocgbase_prnt_tl _chld_tl}{
     %parent has >=1 children (i. e. my older siblings), traverse them
     \tl_set:Nv\l__ocgbase_prev_sbl_tl{g_ocgbase_nd_\l__ocgbase_prnt_tl _chld_tl}
@@ -225,16 +230,31 @@
   }
   %set the OCG I am referring to
   \tl_gset:cx{g_ocgbase_nd_\l__ocgbase_cur_nd_tl _ocg_tl}{#1}
-  %push current node on node stack
-  \seq_gpush:NV\g_ocgbase_nd_stack_seq\l__ocgbase_cur_nd_tl
+  %push current node and its associated OCG obj on the stacks
+  \seq_gpush:NV\g_ocgbase_tree_nd_stack_seq\l__ocgbase_cur_nd_tl
+  \seq_gpush:Nx\g_ocgbase_tree_ocg_stack_seq{#1}
 } 
+
+%macro that ends insertion of OCG and sub-OCGs into Order tree
+\cs_new:Nn\ocgbase_tree_node_end:{
+  \seq_get:NN\g_ocgbase_tree_nd_stack_seq\l_tempa_tl
+  \seq_get:NN\g_ocgbase_tree_ocg_stack_seq\l_tempb_tl
+  \str_if_eq_x:nnT{
+    \cs_if_exist_use:c{g_ocgbase_nd_\l_tempa_tl _ocg_tl}
+  }{
+    \l_tempb_tl
+  }{
+    \seq_gpop:NN\g_ocgbase_tree_nd_stack_seq\g_trash_tl
+    \seq_gpop:NN\g_ocgbase_tree_ocg_stack_seq\g_trash_tl
+  }
+}
 
 % helper macro; traverses siblings to find either
 % the node which refers to the same OCG (arg #2 remains un-modified), or
 % the last sibling inserted (arg #2 is cleared);
 % the node id of the sibling found is returned in arg #1
 \cs_new:Nn\ocgbase_traverse_siblings:NN{
-  % #1: current node (in/out),  #2: OCG ID (in/out)
+  % #1: current node (in/out),  #2: OCG obj (in/out)
   \str_if_eq_x:nnF{#2}{\tl_use:c{g_ocgbase_nd_#1_ocg_tl}}{
     \tl_if_exist:cTF{g_ocgbase_nd_#1_sbl_tl}{
       \tl_set:Nv#1{g_ocgbase_nd_#1_sbl_tl}
@@ -253,17 +273,25 @@
   \tl_put_right:Nx#1{~\tl_use:c{g_ocgbase_nd_\l__ocgbase_cur_nd_tl _ocg_tl}}
   % second, traverse the tree starting with the first child node
   \tl_if_exist:cT{g_ocgbase_nd_\l__ocgbase_cur_nd_tl _chld_tl}{
-    \seq_gpush:NV\g_ocgbase_nd_stack_seq\l__ocgbase_cur_nd_tl
+    \seq_gpush:NV\g_ocgbase_tree_nd_stack_seq\l__ocgbase_cur_nd_tl
     \tl_put_right:Nn#1{~[}
     \ocgbase_build_order:Nn#1{
       \tl_use:c{g_ocgbase_nd_\l__ocgbase_cur_nd_tl _chld_tl}}
     \tl_put_right:Nn#1{~]}
-    \seq_gpop:NN\g_ocgbase_nd_stack_seq\l__ocgbase_cur_nd_tl
+    \seq_gpop:NN\g_ocgbase_tree_nd_stack_seq\l__ocgbase_cur_nd_tl
   }
   % third, traverse the tree starting with the next sibling node
   \tl_if_exist:cT{g_ocgbase_nd_\l__ocgbase_cur_nd_tl _sbl_tl}{
     \ocgbase_build_order:Nn#1{
       \tl_use:c{g_ocgbase_nd_\l__ocgbase_cur_nd_tl _sbl_tl}}
+  }
+}
+
+%macro for appending an OCG object to the global `OFF' list
+%(initial non-visibility)
+\cs_new_nopar:Nn\ocgbase_add_to_off_list:n{
+  \seq_if_in:NxF\g_ocgbase_offocgs_seq{#1}{
+    \seq_gput_right:Nx\g_ocgbase_offocgs_seq{#1}
   }
 }
 
@@ -292,18 +320,7 @@
 
 % OC-marked content
 \cs_new_nopar:Nn\ocgbase_oc_bdc:n{\pbs_pdfbdc:nn{/OC}{#1}}
-\cs_new_nopar:Nn\ocgbase_oc_emc:{
-  \pbs_pdfemc:
-  \seq_get:NN\g_ocgbase_nd_stack_seq\l_tempa_tl
-  \seq_get:NN\g_ocgbase_open_stack_seq\l_tempb_tl
-  \str_if_eq_x:nnT{
-    \cs_if_exist_use:c{g_ocgbase_nd_\l_tempa_tl _ocg_tl}
-  }{
-    \l_tempb_tl
-  }{
-    \seq_gpop:NN\g_ocgbase_nd_stack_seq\g_trash_tl
-  }
-}
+\cs_new_nopar:Nn\ocgbase_oc_emc:{\pbs_pdfemc:}
 
 %stack of PDF obj references of currently open OCGs
 \seq_new:N\g_ocgbase_open_stack_seq
@@ -325,7 +342,8 @@
 %l2e versions
 \cs_gset_eq:NN\ocgbase@new@ocg\ocgbase_new_ocg:nnn
 \cs_gset_eq:NN\ocgbase@last@ocg\ocgbase_last_ocg:
-\cs_gset_eq:NN\ocgbase@insert@ocg@in@tree\ocgbase_insert_ocg_in_tree:n
+\cs_gset_eq:NN\ocgbase@tree@node@begin\ocgbase_tree_node_begin:n
+\cs_gset_eq:NN\ocgbase@tree@node@end\ocgbase_tree_node_end:
 \cs_gset_eq:NN\ocgbase@add@to@off@list\ocgbase_add_to_off_list:n
 \cs_gset_eq:NN\ocgbase@del@from@off@list\ocgbase_del_from_off_list:n
 \cs_gset_eq:NN\ocgbase@add@ocg@to@radiobtn@grp\ocgbase_add_ocg_to_radiobtn_grp:nn

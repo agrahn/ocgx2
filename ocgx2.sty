@@ -195,7 +195,7 @@
     \ocgxii_stack_shipout:NN\ocgxii@ocg@stack@on@page\g_ocgbase_open_stack_seq
     % insert OCG into Order tree
     \int_compare:nT{\l_ocgxii_listno_tl!=\c_one}{
-      \ocgbase_insert_ocg_in_tree:n{\tl_use:c{ocgxii@#3}}
+      \ocgbase_tree_node_begin:n{\tl_use:c{ocgxii@#3}}
     }
   \group_end:
   \ocgbase_oc_bdc:n{\tl_use:c{ocgxii@#3}}
@@ -205,6 +205,7 @@
 \cs_new_nopar:Nn\ocgxii_endocg:{
   \unskip
   \ocgbase_oc_emc:
+  \ocgbase_tree_node_end:
   \ocgbase_open_stack_pop:N\l_trash_tl
   \ocgxii_stack_shipout:NN\ocgxii@ocg@stack@on@page\g_ocgbase_open_stack_seq
 }
