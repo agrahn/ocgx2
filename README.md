@@ -20,7 +20,7 @@ adds support for all known engines and back-ends including:
 Also, it adds some features, improvements and bug fixes, such as package
 options, remembering option settings of re-opened OCGs, correct behaviour of
 layer switching links that were themselves placed on layers, correct listing
-of (nested) OCGs in the layers tab of PDF viewers, compatibility with the
+of (nested) OCGs in the "Layers" tab of PDF viewers, compatibility with the
 `animate` and `media9` packages, a re-implementation of **`hyperref`**'s
 **`ocgcolorlink`** option.
 
@@ -85,16 +85,15 @@ and `<options>`:
 viewocg = always | never | ifvisible
 printocg =  always | never | ifvisible
 exportocg =  always | never | ifvisible
-listintoolbar= always | never | iffirstuse
 
-showingui
+showingui= true | false
 radiobtngrp = <group name>
 tikz
 ocgcolorlinks
 ````
 **not in** `ocgx`, `ocg-p`:
 
-* `showingui` (same as `listintoolbar`)
+* `showingui` (to be preferred over `listintoolbar` of `ocgx/ocg-p`)
 * `radiobtngrp = <group name>` (string; environment-only option)
 * `tikz`  (package-only option, see above)
 * `ocgcolorlinks`  (package-only option, see above)
@@ -102,7 +101,7 @@ ocgcolorlinks
 Package options have global scope. Environment options override package options
 locally.
 
-Layers can be added to one or several Radio Button Groups using the new option
+Layers can be added to one or several **Radio Button Groups** using the new option
 `radiobtngrp`. From all layers within a Radio Button Group only one can be
 enabled at a time. Enabling a layer, e. g. in the Layers tab of the PDF viewer,
 automatically hides the previously visible layer.  Option `radiobtngrp` can
@@ -154,12 +153,6 @@ For example:
 ````latex
 \href{http://ctan.org}{Visit me on \ocglinkprotect{\includegraphics{ctan-lion}}!}
 ````
-
-Alternatively, the whole link can be placed inside
-````latex
-\hypersetup{breaklinks=false}...\hypersetup{breaklinks=true}
-````
-to temporarily disable breakable links.
 
 ## License
 

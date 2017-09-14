@@ -98,8 +98,8 @@
 \RequirePackage{expl3}
 \RequirePackage{pdfbase}
 
-\def\g@ocgbase@date@tl{2017/03/30}
-\def\g@ocgbase@version@tl{0.10}
+\def\g@ocgbase@date@tl{2017/09/14}
+\def\g@ocgbase@version@tl{0.11}
 
 \ProvidesExplPackage{ocgbase}{\g@ocgbase@date@tl}{\g@ocgbase@version@tl}
 {support package for ocgx2.sty}
@@ -233,7 +233,7 @@
   %push current node and its associated OCG obj on the stacks
   \seq_gpush:NV\g_ocgbase_tree_nd_stack_seq\l__ocgbase_cur_nd_tl
   \seq_gpush:Nx\g_ocgbase_tree_ocg_stack_seq{#1}
-} 
+}
 
 %macro that ends insertion of OCG and sub-OCGs into Order tree
 \cs_new:Nn\ocgbase_tree_node_end:{
@@ -262,7 +262,7 @@
     }{
       \tl_clear:N#2
     }
-  }  
+  }
 }
 
 \cs_new:Nn\ocgbase_build_order:Nn{
@@ -309,7 +309,7 @@
 \cs_new_nopar:Nn\ocgbase_add_ocg_to_radiobtn_grp:nn{
   % #1: rbtn group name,
   % #2: OCG obj ref
-  \seq_if_exist:cF{g_ocgbase_rbtn_group_#1_seq}{   
+  \seq_if_exist:cF{g_ocgbase_rbtn_group_#1_seq}{
     \seq_new:c{g_ocgbase_rbtn_group_#1_seq}
     \seq_gput_right:Nx\g_ocgbase_rbtn_groups_seq{#1}
   }

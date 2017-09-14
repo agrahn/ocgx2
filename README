@@ -81,11 +81,10 @@ With <initial visibility> = ( on | true | 1 )  |  ( off | false | 0 )
 and <options> : viewocg = always | never | ifvisible
                 printocg =  always | never | ifvisible
                 exportocg =  always | never | ifvisible
-                listintoolbar= always | never | iffirstuse
 
     not in ocgx, ocg-p:
 
-                showingui (same as `listintoolbar')
+                showingui (to be preferred over `listintoolbar' of ocgx/ocg-p)
                 radiobtngrp = <group name> (string; environment-only option)
 
                 tikz  (package-only option, see above)
@@ -140,12 +139,6 @@ For example:
 
   \href{http://ctan.org}{Visit me on
                     \ocglinkprotect{\includegraphics{ctan-lion}}!}
-
-Alternatively, the whole link can be placed inside
-
-  \hypersetup{breaklinks=false}...\hypersetup{breaklinks=true}
-
-to temporarily disable breakable links.
 
 
                      * * *

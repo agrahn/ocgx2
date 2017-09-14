@@ -37,8 +37,8 @@
 \RequirePackage{xparse}
 \RequirePackage{l3keys2e}
 
-\def\g@ocgxii@date@tl{2017/06/08}
-\def\g@ocgxii@version@tl{0.29}
+\def\g@ocgxii@date@tl{2017/09/14}
+\def\g@ocgxii@version@tl{0.30}
 
 \ProvidesExplPackage{ocgx2}{\g@ocgxii@date@tl}{\g@ocgxii@version@tl}
 {ports `ocgx' functionality to dvips+ps2pdf, xelatex and dvipdfmx}
@@ -67,6 +67,11 @@
   to~the~preamble~of~your~document.
 }
 
+\msg_set:nnn{ocgx2}{beamer~and~ocgcolorlinks}{
+  Option~`ocgcolorlinks'~cannot~be~used~with~class~Beamer.\\\\
+  Using~`colorlinks'~instead.
+}
+
 %package opts
 %unknown package option error message
 \msg_set:nnnn{ocgx2}{unknown~package~option}{Unknown~package~option~`#1'.}{
@@ -77,6 +82,8 @@
 \bool_new:N\g_ocgxii_dvipdfmx_bool
 \bool_new:N\l_ocgxii_tikz_bool
 \bool_new:N\l_ocgxii_ocgcolorlinks_bool
+\bool_new:N\g_ocgxii_showingui_bool
+\bool_new:N\l_ocgxii_showingui_bool
 
 \keys_define:nn{ocgx2}{
   xetex .code:n = {
@@ -112,13 +119,20 @@
   exportocg / ifvisible .code:n={\tl_gclear_new:N\g_ocgxii_export_tl},
   exportocg .default:n={ifvisible},
 
-  listintoolbar .choices:nn = {always,never,iffirstuse}{
-    \tl_gset:Nx\g_ocgxii_listno_tl{\int_eval:n{\l_keys_choice_int-\c_one}}
+  showingui .choices:nn = {true,false,always,never,iffirstuse}{
+    \bool_if:nTF{
+      \str_if_eq_x_p:nn{#1}{false} ||
+      \str_if_eq_x_p:nn{#1}{never}
+    }{
+      \bool_gset_false:N\g_ocgxii_showingui_bool
+    }{
+      \bool_gset_true:N\g_ocgxii_showingui_bool
+    }
   },
-  listintoolbar .default:n={iffirstuse},
+  showingui .default:n={true},
 
-  showingui .meta:n = {listintoolbar=#1},
-  showingui .default:n={iffirstuse},
+  listintoolbar .meta:n = {showingui=#1},
+  listintoolbar .default:n={true},
 
   tikz .bool_set:N = \l_ocgxii_tikz_bool,
   tikz .default:n = true,
@@ -194,7 +208,7 @@
     \ocgbase_open_stack_push:n{\tl_use:c{ocgxii@#3}}
     \ocgxii_stack_shipout:NN\ocgxii@ocg@stack@on@page\g_ocgbase_open_stack_seq
     % insert OCG into Order tree
-    \int_compare:nT{\l_ocgxii_listno_tl!=\c_one}{
+    \bool_if:NT\l_ocgxii_showingui_bool{
       \ocgbase_tree_node_begin:n{\tl_use:c{ocgxii@#3}}
     }
   \group_end:
@@ -631,13 +645,20 @@
   exportocg / ifvisible .code:n={\tl_clear:N\l_ocgxii_export_tl},
   exportocg .default:n={ifvisible},
 
-  listintoolbar .choices:nn = {always,never,iffirstuse}{
-    \tl_set:Nx\l_ocgxii_listno_tl{\int_eval:n{\l_keys_choice_int-\c_one}}
+  showingui .choices:nn = {true,false,always,never,iffirstuse}{
+    \bool_if:nTF{
+      \str_if_eq_x_p:nn{#1}{false} ||
+      \str_if_eq_x_p:nn{#1}{never}
+    }{
+      \bool_set_false:N\l_ocgxii_showingui_bool
+    }{
+      \bool_set_true:N\l_ocgxii_showingui_bool
+    }
   },
-  listintoolbar .default:n={iffirstuse},
+  showingui .default:n={true},
 
-  showingui .meta:n = {listintoolbar=#1},
-  showingui .default:n={iffirstuse},
+  listintoolbar .meta:n = {showingui=#1},
+  listintoolbar .default:n={true},
 
   radiobtngrp .code:n = {
     \seq_if_in:NxF\l_ocgxii_rbgrps_seq{#1}{
@@ -651,7 +672,7 @@
   \tl_set_eq:NN\l_ocgxii_view_tl\g_ocgxii_view_tl
   \tl_set_eq:NN\l_ocgxii_print_tl\g_ocgxii_print_tl
   \tl_set_eq:NN\l_ocgxii_export_tl\g_ocgxii_export_tl
-  \tl_set_eq:NN\l_ocgxii_listno_tl\g_ocgxii_listno_tl
+  \bool_set_eq:NN\l_ocgxii_showingui_bool\g_ocgxii_showingui_bool
   %stack of radio button group names the current ocg belongs to
   \seq_clear_new:N\l_ocgxii_rbgrps_seq
 }
@@ -678,7 +699,7 @@
 %
 %   with pdftex, luatex, xetex, dvipdfmx drivers
 %
-% based on Ben Lerner's solution
+% based on Ben Lerner's idea
 %   http://tex.stackexchange.com/a/104227;
 % with some improvements
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -775,7 +796,7 @@
   }
   \cs_gset_nopar:Nn\ocgxii_colourlink_end:{
     %this should keep empty link annots from flooding the page with link
-    %colour by placing a default glyph (`.') off the page limits;
+    %colour by placing a default glyph (`.') beyond the page limits;
     %only works with pdfLaTeX/LuaLaTeX
     \sys_if_output_pdf:T{
       \vbox_to_zero:n{
@@ -818,6 +839,15 @@
     }}
     \ocgxii_colourlink_begin:
   }
+}
+
+% option ocgcolorlinks and beamer are not compatible
+\bool_if:NT\l_ocgxii_ocgcolorlinks_bool{
+  \@ifclassloaded{beamer}{
+    \bool_set_false:N\l_ocgxii_ocgcolorlinks_bool
+    \hypersetup{colorlinks}
+    \msg_warning:nn{ocgx2}{beamer~and~ocgcolorlinks}
+  }{}
 }
 
 \bool_if:NT\l_ocgxii_ocgcolorlinks_bool{
@@ -902,7 +932,7 @@
   switch ocg with mark on/.style 2 args={
     postaction={
       path picture={
-        \begin{ocg}[showingui=never]{#1}{#1}{1}
+        \begin{ocg}[showingui=false]{#1}{#1}{1}
           \draw
           (path picture bounding box.south west)
           --
@@ -919,7 +949,7 @@
   switch ocg with mark off/.style 2 args={
     postaction={
       path picture={
-        \begin{ocg}[showingui=never]{#1}{#1}{0}
+        \begin{ocg}[showingui=false]{#1}{#1}{0}
           \draw
           (path picture bounding box.south west)
           --
