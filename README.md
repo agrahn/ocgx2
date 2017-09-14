@@ -156,6 +156,5 @@ For example:
 
 ## License
 
-This material is subject to the [LaTeX Project Public License](http://mirrors.ctan.org/help/Catalogue/licenses.lppl.html
-).
+This material is subject to the [LaTeX Project Public License](http://mirrors.ctan.org/macros/latex/base/lppl.txt).
 
