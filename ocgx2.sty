@@ -35,8 +35,8 @@
 \RequirePackage{xparse}
 \RequirePackage{l3keys2e}
 
-\def\g@ocgxii@date@tl{2017/09/14}
-\def\g@ocgxii@version@tl{0.30}
+\def\g@ocgxii@date@tl{2017/09/19}
+\def\g@ocgxii@version@tl{0.31}
 
 \ProvidesExplPackage{ocgx2}{\g@ocgxii@date@tl}{\g@ocgxii@version@tl}
 {ports `ocgx' functionality to dvips+ps2pdf, xelatex and dvipdfmx}
@@ -148,7 +148,12 @@
 
 %process package options
 \ProcessKeysOptions{ocgx2}
-\sys_if_engine_xetex:T{\bool_gset_true:N\g_ocgxii_dvipdfmx_bool}
+\sys_if_engine_xetex:T{
+  \bool_gset_true:N\g_ocgxii_dvipdfmx_bool
+  %we use the period `.' from this downscaled font at the end of ocgcolorlinks,
+  %preventing empty links from flooding the page with link color
+  \font\g_ocgxii_lmroman_tl="[lmroman5-regular.otf]"~scaled~1
+}
 
 \RequirePackage{ocgbase} %also loads pdfbase.sty
 
@@ -793,15 +798,19 @@
     \ocgxii_literal_page:n{q~7~Tr}
   }
   \cs_gset_nopar:Nn\ocgxii_colourlink_end:{
-    %this should keep empty link annots from flooding the page with link
-    %colour by placing a default glyph (`.') beyond the page limits;
-    %only works with pdfLaTeX/LuaLaTeX
-    \sys_if_output_pdf:T{
+    %this should keep empty link annots from flooding the page with link colour
+    \sys_if_output_pdf:TF{
+      % with pdftex/luatex we provide a default glyph (`.') which we place
+      % beyond the page limits
       \vbox_to_zero:n{
         \vss
-        \hbox_to_zero:n{\skip_horizontal:n{2\paperwidth}.\hss}
+        \hbox_overlap_right:n{\skip_horizontal:n{2\paperwidth}.}
         \skip_vertical:n{2\paperheight}
       }
+    }{
+      %with XeLaTeX we place an invisibly downscaled `.' from the LM
+      %OTF font directly after the link text
+      \sys_if_engine_xetex:T{\hbox_overlap_left:n{\g_ocgxii_lmroman_tl .}}
     }
     \ocgbase_oc_bdc:n{\ocgxii@OCPrint}
       \ocgxii_literal_page:n{-88888~-88888~99999~99999~re~f}
