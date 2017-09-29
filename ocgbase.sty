@@ -96,8 +96,8 @@
 \RequirePackage{expl3}
 \RequirePackage{pdfbase}
 
-\def\g@ocgbase@date@tl{2017/09/14}
-\def\g@ocgbase@version@tl{0.11}
+\def\g@ocgbase@date@tl{2017/09/29}
+\def\g@ocgbase@version@tl{0.12}
 
 \ProvidesExplPackage{ocgbase}{\g@ocgbase@date@tl}{\g@ocgbase@version@tl}
 {support package for ocgx2.sty}
@@ -108,7 +108,7 @@
   Get~an~up~to~date~version~of~`#1'.\\
   Aborting.
 }
-\@ifpackagelater{pdfbase}{2017/03/23}{}{
+\@ifpackagelater{pdfbase}{2017/09/29}{}{
   \msg_error:nnn{ocgbase}{support~outdated}{pdfbase.sty}
   \tex_endinput:D
 }

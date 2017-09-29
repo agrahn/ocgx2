@@ -35,8 +35,8 @@
 \RequirePackage{xparse}
 \RequirePackage{l3keys2e}
 
-\def\g@ocgxii@date@tl{2017/09/19}
-\def\g@ocgxii@version@tl{0.31}
+\def\g@ocgxii@date@tl{2017/09/29}
+\def\g@ocgxii@version@tl{0.32}
 
 \ProvidesExplPackage{ocgx2}{\g@ocgxii@date@tl}{\g@ocgxii@version@tl}
 {ports `ocgx' functionality to dvips+ps2pdf, xelatex and dvipdfmx}
@@ -706,15 +706,6 @@
 %   http://tex.stackexchange.com/a/104227;
 % with some improvements
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\sys_if_output_pdf:TF{
-  \cs_new:Nn\ocgxii_literal_page:n{\pdfliteral~page~{#1}}
-%  \cs_new:Nn\ocgxii_literal_page:n{\pdfliteral~direct~{#1}}
-}{
-  \bool_if:NT\g_ocgxii_dvipdfmx_bool{ %dvipdfmx/XeTeX
-    \cs_new:Nn\ocgxii_literal_page:n{\special{pdf:code~#1}}
-%    \cs_new:Nn\ocgxii_literal_page:n{\special{pdf:literal~direct~#1}}
-  }
-}
 
 \cs_new_nopar:Nn\ocgxii_colourlink_begin:{}
 \cs_new_nopar:Nn\ocgxii_colourlink_end:{}
@@ -794,58 +785,67 @@
       \fi
     }
   }
-  \cs_gset_nopar:Nn\ocgxii_colourlink_begin:{
-    \ocgxii_literal_page:n{q~7~Tr}
-  }
-  \cs_gset_nopar:Nn\ocgxii_colourlink_end:{
-    %this should keep empty link annots from flooding the page with link colour
-    \sys_if_output_pdf:TF{
-      % with pdftex/luatex we provide a default glyph (`.') which we place
-      % beyond the page limits
-      \vbox_to_zero:n{
-        \vss
-        \hbox_overlap_right:n{\skip_horizontal:n{2\paperwidth}.}
-        \skip_vertical:n{2\paperheight}
-      }
-    }{
-      %with XeLaTeX we place an invisibly downscaled `.' from the LM
-      %OTF font directly after the link text
-      \sys_if_engine_xetex:T{\hbox_overlap_left:n{\g_ocgxii_lmroman_tl .}}
+  \bool_if:NT\l_ocgxii_ocgcolorlinks_bool{
+    \cs_gset_nopar:Nn\ocgxii_colourlink_begin:{
+      \pbs_literal:nn{page}{q~7~Tr}
     }
-    \ocgbase_oc_bdc:n{\ocgxii@OCPrint}
-      \ocgxii_literal_page:n{-88888~-88888~99999~99999~re~f}
-    \ocgbase_oc_emc:
-    \ocgbase_oc_bdc:n{\ocgxii@OCView}
-      \group_begin:
-        \exp_after:wN\HyColor@UseColor\g_ocgxii_lnkcol_tl
-        \ocgxii_literal_page:n{-88888~-88888~99999~99999~re~f}
-      \group_end:
-    \ocgbase_oc_emc:
-    \ocgxii_literal_page:n{0~Tr~Q}
+    \cs_gset_nopar:Nn\ocgxii_colourlink_end:{
+      %this should keep empty link annots from flooding the page with link colour
+      \sys_if_output_pdf:TF{
+        % with pdftex/luatex we provide a default glyph (`.') which we place
+        % beyond the page limits
+        \vbox_to_zero:n{
+          \vss
+          \hbox_overlap_right:n{\skip_horizontal:n{2\paperwidth}.}
+          \skip_vertical:n{2\paperheight}
+        }
+      }{
+        %with XeLaTeX we place an invisibly downscaled `.' from the LM font
+        %directly after the link text
+        \sys_if_engine_xetex:T{\hbox_overlap_left:n{\g_ocgxii_lmroman_tl .}}
+      }
+      \ocgbase_oc_bdc:n{\ocgxii@OCPrint}
+        \pbs_literal:nn{page}{-88888~-88888~99999~99999~re~f}
+      \ocgbase_oc_emc:
+      \ocgbase_oc_bdc:n{\ocgxii@OCView}
+        \group_begin:
+          \exp_after:wN\HyColor@UseColor\g_ocgxii_lnkcol_tl
+          \pbs_literal:nn{page}{-88888~-88888~99999~99999~re~f}
+        \group_end:
+      \ocgbase_oc_emc:
+      \pbs_literal:nn{page}{0~Tr~Q}
+    }
   }
 }
 
 % user command for protecting graphical content (external file, inline
 % [e. g. TikZ], \fbox{...}) inside breakable ocgcolorlink
-\DeclareDocumentCommand\ocglinkprotect{m}{
-  \seq_get_left:NNT\g_ocgxii_lnk_color_seq\l_tmpa_tl{
-    \tl_gset_eq:NN\g_ocgxii_lnkcol_tl\l_tmpa_tl
-    \ocgxii_colourlink_end:
-    \group_begin:
-      \tl_set_eq:NN\l_ocgxii_lnkcol_tl\l_tmpa_tl
-      \ocgxii_colourlink_nobreak_begin:
+\bool_if:NTF\l_ocgxii_ocgcolorlinks_bool{
+  \DeclareDocumentCommand\ocglinkprotect{m}{
+    \seq_get_left:NNT\g_ocgxii_lnk_color_seq\l_tmpa_tl{
+      \tl_gset_eq:NN\g_ocgxii_lnkcol_tl\l_tmpa_tl
+      \ocgxii_colourlink_end:
+      \group_begin:
+        \tl_set_eq:NN\l_ocgxii_lnkcol_tl\l_tmpa_tl
+        \ocgxii_colourlink_nobreak_begin:
+    }
+    \sys_if_output_pdf:TF{
+      \hbox_set:Nn\l_tmpb_box{#1}
+      \hbox_to_wd:nn{\box_wd:N\l_tmpb_box}{
+        \vrule~width~\c_zero_dim~height~\box_ht:N\l_tmpb_box~
+          depth~\box_dp:N\l_tmpb_box
+        \pbs_pdfxform:nnnnn{1}{0}{}{}{\l_tmpb_box}
+        \pbs_pdfrefxform:n{\pbs_pdflastxform:}
+      }
+    }{#1}
+    \seq_get_left:NNT\g_ocgxii_lnk_color_seq\l_tmpa_tl{
+        \ocgxii_colourlink_nobreak_end:
+      \group_end:
+      \ocgxii_colourlink_begin:
+    }
   }
-  #1
-  \seq_get_left:NNT\g_ocgxii_lnk_color_seq\l_tmpa_tl{
-      \ocgxii_colourlink_nobreak_end:
-    \group_end:
-    \sys_if_output_pdf:T{\vbox_to_zero:n{ % avoid mixing up CTM
-      \vss
-      \hbox_to_zero:n{\skip_horizontal:n{2\paperwidth}.\hss}
-      \skip_vertical:n{2\paperheight}
-    }}
-    \ocgxii_colourlink_begin:
-  }
+}{
+  \DeclareDocumentCommand\ocglinkprotect{m}{#1}
 }
 
 % option ocgcolorlinks and beamer are not compatible
