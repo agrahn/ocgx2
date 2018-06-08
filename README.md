@@ -2,7 +2,7 @@
 
 © 2015--`\today`, Alexander Grahn
 
-https://github.com/agrahn/ocgx2
+**Notice:** I moved to [GitLab](https://gitlab.com/agrahn/ocgx2) recently.
 
 ## Introduction
 
